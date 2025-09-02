@@ -17,7 +17,7 @@ export default function Login() {
 
     // Guardar token
     localStorage.setItem("token", data.session.access_token);
-    navigate("/clientes");
+    navigate("/userInfo");
 
   };
 

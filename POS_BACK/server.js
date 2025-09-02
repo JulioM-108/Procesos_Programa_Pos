@@ -1,4 +1,3 @@
-import { createClient } from "@supabase/supabase-js";
 import routes from "./routes.js";
 import express from "express";
 import cors from "cors"; // Instala: npm install cors

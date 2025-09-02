@@ -19,6 +19,28 @@ function getSupabaseClient(req) {
 }
 
 // ==========================
+// USUARIO AUTENTICADO (ROL)
+// ==========================
+router.get("/me", async (req, res) => {
+  const supabase = getSupabaseClient(req);
+
+  // Obtener el usuario autenticado
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError) return res.status(401).json({ error: userError.message });
+
+  // Buscar el empleado por user_id
+  const { data, error } = await supabase
+    .from("empleados")
+    .select("id_empleado, nombre, rol, email")
+    .eq("user_id", user.id)
+    .single();
+
+  if (error) return res.status(400).json({ error: error.message });
+
+  res.json(data);
+});
+
+// ==========================
 // EMPLEADOS
 // ==========================
 router.get("/empleados", async (req, res) => {
