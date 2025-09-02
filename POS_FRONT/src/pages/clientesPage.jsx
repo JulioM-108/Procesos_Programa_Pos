@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getClientes, postCliente, deleteCliente, getSession } from "../api";
+import "./styles/Admin.css";
 
 export default function ClientesPage() {
   const [user, setUser] = useState(null);
@@ -47,28 +48,59 @@ export default function ClientesPage() {
   };
 
   return (
-    <div>
-      <h2>Gestión de Clientes</h2>
-      {user && <p>Logueado como: {user.email}</p>}
+    <div className="admin-container">
+      <h1 className="main-title">Panel Administrativo</h1>
 
-      <h3>Crear Cliente</h3>
-      <form onSubmit={handleCreate}>
-        <input type="text" placeholder="Cédula" value={cedula} onChange={(e) => setCedula(e.target.value)} required />
-        <input type="text" placeholder="Nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
-        <input type="text" placeholder="Teléfono" value={telefono} onChange={(e) => setTelefono(e.target.value)} />
-        <button type="submit">Crear</button>
-      </form>
+      <div className="admin-section-card">
+        <h2 className="section-title">Crear Nuevo Empleado</h2>
+        <div className="form-group">
+          <input
+            className="input-field"
+            placeholder="Cédula"
+            value={nuevoEmpleado.cedula}
+            onChange={e => setNuevoEmpleado({ ...nuevoEmpleado, cedula: e.target.value })}
+          />
+          <input
+            className="input-field"
+            placeholder="Nombre"
+            value={nuevoEmpleado.nombre}
+            onChange={e => setNuevoEmpleado({ ...nuevoEmpleado, nombre: e.target.value })}
+          />
+        </div>
+        <div className="form-group">
+          <select
+            className="select-field"
+            value={nuevoEmpleado.rol}
+            onChange={e => setNuevoEmpleado({ ...nuevoEmpleado, rol: e.target.value })}
+          >
+            <option value="cajero">Cajero</option>
+            <option value="administrador">Administrador</option>
+          </select>
+          <button className="main-button" onClick={handleCrearEmpleado}>Crear</button>
+        </div>
+      </div>
 
-      <h3>Lista de Clientes</h3>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <ul>
-        {clientes.map((c) => (
-          <li key={c.cedula}>
-            {c.nombre} ({c.cedula}) - {c.telefono}{" "}
-            <button onClick={() => handleDelete(c.cedula)}>Eliminar</button>
-          </li>
-        ))}
-      </ul>
+      <div className="admin-section-card">
+        <h2 className="section-title">Empleados</h2>
+        <ul className="list-group">
+          {empleados.map(emp => (
+            <li className="list-item" key={emp.id_empleado}>
+              {emp.nombre} - {emp.rol}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="admin-section-card">
+        <h2 className="section-title">Clientes</h2>
+        <ul className="list-group">
+          {clientes.map(cli => (
+            <li className="list-item" key={cli.cedula}>
+              {cli.nombre} - {cli.cedula}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

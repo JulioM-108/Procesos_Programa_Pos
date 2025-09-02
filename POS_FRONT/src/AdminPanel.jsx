@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getEmpleados, postCliente, getClientes, putCliente } from "./api";
 
+
 export default function AdminPanel() {
   const [empleados, setEmpleados] = useState([]);
   const [clientes, setClientes] = useState([]);

@@ -1,0 +1,88 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.cliente-container {
+  background-color: #3f51b5;
+  font-family: Arial, sans-serif;
+  padding: 40px;
+}
+
+.cliente-card {
+  background-color: #4f63be;
+  padding: 20px; 
+  color: white;
+  font-family: Arial, sans-serif ;
+  font-size: 20px;
+  border-radius: 10px;
+  border: 2px solid black;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 900px; 
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.cliente-title {
+  font-weight: bold;
+  color: white;
+  font-family: Arial, sans-serif;
+  border: 2px solid black;
+  padding: 10px 20px;
+  background-color: #4f63be;
+  height: auto;
+  width: auto; 
+  display: inline-block; 
+  border-radius: 10px;
+}
+
+.cliente-card button {
+  padding: 10px 30px; 
+  height: auto; 
+  border: none; 
+  border-radius: 6px;
+  background-color: #007bff;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.cliente-input {
+  padding: 5px;
+  border: 2px solid black;
+  border-radius: 5px;
+  font-size: 1rem;
+  margin-right: 10px;
+  padding: 5px; 
+}
+
+.cliente-card button:hover {
+  background-color: #dc3545;
+}
+
+.clientes-table {
+  width: 100%;
+  border-collapse: collapse; 
+  color: white;
+  border: 2px solid black;
+}
+
+.clientes-table th,
+.clientes-table td {
+  padding: 12px;
+  text-align: left;
+}
+
+.clientes-table th {
+  background-color: rgba(255, 255, 255, 0.1);
+  font-weight: bold;
+}
+
+.clientes-table tbody tr {
+  background-color: white;
+  color: black;
+  border-bottom: 1px solid #ddd;
+}
