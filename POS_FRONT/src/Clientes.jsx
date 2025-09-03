@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { getClientes, postCliente } from "./api";
+import { getClientes, postCliente, putCliente } from "./api";
+import { useNavigate } from "react-router-dom";
 import "./styles/cliente.css";
 
 export default function Clientes() {
   const [clientes, setClientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  const [cedulaEliminar, setCedulaEliminar] = useState("");
   const [nuevoCliente, setNuevoCliente] = useState({
     cedula: "",
     nombre: "",
-    telefono: ""
+    telefono: "",
   });
 
   // Cargar clientes al inicio
@@ -63,15 +66,49 @@ export default function Clientes() {
     }
   };
 
+// Función eliminar con input
+const handleEliminarCliente = async () => {
+  if (!cedulaEliminar) {
+    return alert("Por favor ingresa una cédula");
+  }
+
+  try {
+    const actualizado = await putCliente(cedulaEliminar, { estado: 0 });
+
+    if (actualizado.error) {
+      alert("Error: " + actualizado.error);
+      return;
+    }
+
+    await cargarClientes();
+    alert("Cliente eliminado (Estado = 0)");
+
+    // Limpiar input
+    setCedulaEliminar("");
+  } catch (err) {
+    console.error("Error al eliminar cliente:", err);
+    alert("Error al eliminar cliente");
+  }
+};
+
+
+  const handleLogout = () => {
+  localStorage.removeItem("token");
+  navigate("/", { replace: true });
+  };
+
+
   if (loading) {
     return <div style={{ padding: 20 }}>Cargando clientes...</div>;
   }
 
   return (
        <div className="cliente-container">
-          <h1 className="cliente-title"> Gestión de Clientes</h1>
+        <div className="cliente-header">
+          <h1 className="cliente-title2">Gestión de Clientes</h1>
+          <button className="cliente-logout" onClick={handleLogout}>Cerrar Sesión</button>
+        </div>
           <div className="cliente-card">
-
           {error && (
             <div style={{ 
               color: 'red', 
@@ -110,18 +147,29 @@ export default function Clientes() {
             <button onClick={handleCrearCliente} > Crear Cliente</button>
           </div>
           </div>
+          <div className="cliente-card1">
+          <h2>Eliminar Cliente</h2>
+          <input
+            placeholder="Cédula"
+            value={cedulaEliminar}
+            onChange={(e) => setCedulaEliminar(e.target.value)}
+            className="cliente-input1"
+          />
+          <button onClick={handleEliminarCliente}>Eliminar Cliente</button>
+        </div>
 
           <h2 className="cliente-title" > Clientes Existentes ({clientes.length})</h2>
           {clientes.length === 0 ? (
             <p>No hay clientes registrados.</p>
           ) : (
-            <table className="clientes-table" border={1} cellPadding={5} style={{ marginTop: 10, width: '100%' }}>
+            <table className="clientes-table" border={1} cellPadding={6} style={{ marginTop: 10, width: '100%' }}>
               <thead>
                 <tr>
                   <th >Cédula</th>
                   <th >Nombre</th>
                   <th >Teléfono</th>
                   <th >Puntos</th>
+                  <th >Estado</th>
                   <th >Fecha Registro</th>
                 </tr>
               </thead>
@@ -132,11 +180,13 @@ export default function Clientes() {
                     <td>{cli.nombre}</td>
                     <td>{cli.telefono || 'N/A'}</td>
                     <td>{cli.puntos || 0}</td>
+                    <td>{cli.estado}</td>
                     <td>{cli.fecha_registro ? new Date(cli.fecha_registro).toLocaleString() : 'N/A'}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            
           )}
       </div>
   );
