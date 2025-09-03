@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getClientes, postCliente } from "./api";
+import "./styles/cliente.css";
 
 export default function Clientes() {
   const [clientes, setClientes] = useState([]);
@@ -67,74 +68,76 @@ export default function Clientes() {
   }
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>Gestión de Clientes</h1>
+       <div className="cliente-container">
+          <h1 className="cliente-title"> Gestión de Clientes</h1>
+          <div className="cliente-card">
 
-      {error && (
-        <div style={{ 
-          color: 'red', 
-          padding: 10, 
-          marginBottom: 20, 
-          border: '1px solid red',
-          backgroundColor: '#ffebee'
-        }}>
-          Error: {error}
-          <button onClick={cargarClientes} style={{ marginLeft: 10 }}>
-            Reintentar
-          </button>
-        </div>
-      )}
+          {error && (
+            <div style={{ 
+              color: 'red', 
+              padding: 10, 
+              marginBottom: 20, 
+              border: '1px solid red',
+              backgroundColor: '#ffebee'
+            }}>
+              Error: {error}
+              <button onClick={cargarClientes} style={{ marginLeft: 10 }}>
+                Reintentar
+              </button>
+            </div>
+          )}
 
-      <h2>Crear Nuevo Cliente</h2>
-      <div style={{ marginBottom: 20 }}>
-        <input
-          placeholder="Cédula"
-          value={nuevoCliente.cedula}
-          onChange={e => setNuevoCliente({ ...nuevoCliente, cedula: e.target.value })}
-          style={{ marginRight: 10, padding: 5 }}
-        />
-        <input
-          placeholder="Nombre"
-          value={nuevoCliente.nombre}
-          onChange={e => setNuevoCliente({ ...nuevoCliente, nombre: e.target.value })}
-          style={{ marginRight: 10, padding: 5 }}
-        />
-        <input
-          placeholder="Teléfono"
-          value={nuevoCliente.telefono}
-          onChange={e => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value })}
-          style={{ marginRight: 10, padding: 5 }}
-        />
-        <button onClick={handleCrearCliente}>Crear Cliente</button>
+          <h2 >Crear Nuevo Cliente</h2>
+          <div style={{ marginBottom: 20 }}>
+            <input
+              placeholder="Cédula"
+              value={nuevoCliente.cedula}
+              onChange={e => setNuevoCliente({ ...nuevoCliente, cedula: e.target.value })}
+              className="cliente-input"  
+            />
+            <input
+              placeholder="Nombre"
+              value={nuevoCliente.nombre}
+              onChange={e => setNuevoCliente({ ...nuevoCliente, nombre: e.target.value })}
+              className="cliente-input"  
+            />
+            <input
+              placeholder="Teléfono"
+              value={nuevoCliente.telefono}
+              onChange={e => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value })}
+              className="cliente-input" 
+            />
+            <button onClick={handleCrearCliente} > Crear Cliente</button>
+          </div>
+          </div>
+
+          <h2 className="cliente-title" > Clientes Existentes ({clientes.length})</h2>
+          {clientes.length === 0 ? (
+            <p>No hay clientes registrados.</p>
+          ) : (
+            <table className="clientes-table" border={1} cellPadding={5} style={{ marginTop: 10, width: '100%' }}>
+              <thead>
+                <tr>
+                  <th >Cédula</th>
+                  <th >Nombre</th>
+                  <th >Teléfono</th>
+                  <th >Puntos</th>
+                  <th >Fecha Registro</th>
+                </tr>
+              </thead>
+              <tbody>
+                {clientes.map(cli => (
+                  <tr key={cli.cedula}>
+                    <td>{cli.cedula}</td>
+                    <td>{cli.nombre}</td>
+                    <td>{cli.telefono || 'N/A'}</td>
+                    <td>{cli.puntos || 0}</td>
+                    <td>{cli.fecha_registro ? new Date(cli.fecha_registro).toLocaleString() : 'N/A'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
       </div>
-
-      <h2>Clientes Existentes ({clientes.length})</h2>
-      {clientes.length === 0 ? (
-        <p>No hay clientes registrados.</p>
-      ) : (
-        <table border={1} cellPadding={5} style={{ marginTop: 10, width: '100%' }}>
-          <thead>
-            <tr>
-              <th>Cédula</th>
-              <th>Nombre</th>
-              <th>Teléfono</th>
-              <th>Puntos</th>
-              <th>Fecha Registro</th>
-            </tr>
-          </thead>
-          <tbody>
-            {clientes.map(cli => (
-              <tr key={cli.cedula}>
-                <td>{cli.cedula}</td>
-                <td>{cli.nombre}</td>
-                <td>{cli.telefono || 'N/A'}</td>
-                <td>{cli.puntos || 0}</td>
-                <td>{cli.fecha_registro ? new Date(cli.fecha_registro).toLocaleString() : 'N/A'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
   );
 }
