@@ -8,12 +8,21 @@ export default function Clientes() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+
   const [cedulaEliminar, setCedulaEliminar] = useState("");
   const [nuevoCliente, setNuevoCliente] = useState({
     cedula: "",
     nombre: "",
     telefono: "",
   });
+
+  const [cedulaOriginal, setCedulaOriginal] = useState("");
+  const [clienteEditar, setClienteEditar] = useState({
+    cedula: "",
+    nombre: "",
+    telefono: ""
+  });
+  const [cargandoEdicion, setCargandoEdicion] = useState(false);
 
   // Cargar clientes al inicio
   useEffect(() => {
@@ -97,6 +106,34 @@ const handleEliminarCliente = async () => {
   navigate("/", { replace: true });
   };
 
+const handleEditarCliente = async () => {
+  if (!cedulaOriginal) return alert("Indica la cédula original del cliente que deseas modificar");
+  if (!clienteEditar.cedula || !clienteEditar.nombre) return alert("Cédula y nombre son obligatorios");
+
+  const confirm = window.confirm(`Actualizar cliente ${cedulaOriginal} → nueva cédula: ${clienteEditar.cedula}?`);
+  if (!confirm) return;
+
+  try {
+    setCargandoEdicion(true);
+    const res = await putCliente(cedulaOriginal, clienteEditar);
+
+    if (res.error) {
+      alert("Error: " + res.error);
+      return;
+    }
+
+    await cargarClientes();
+    alert("Cliente actualizado correctamente");
+    setCedulaOriginal("");
+    setClienteEditar({ cedula: "", nombre: "", telefono: "" });
+  } catch (err) {
+    console.error("Error al editar cliente:", err);
+    alert("Error al actualizar el cliente");
+  } finally {
+    setCargandoEdicion(false);
+  }
+};
+
 
   if (loading) {
     return <div style={{ padding: 20 }}>Cargando clientes...</div>;
@@ -107,16 +144,58 @@ const handleEliminarCliente = async () => {
         <div className="cliente-header">
           <h1 className="cliente-title2">Gestión de Clientes</h1>
           <button className="cliente-logout" onClick={handleLogout}>Cerrar Sesión</button>
+          <div className="cliente-card cliente-card-edit">
+          <h2>Modificar Cliente</h2>
+            <input
+              placeholder="Cédula a modificar"
+              value={cedulaOriginal}
+              onChange={e => setCedulaOriginal(e.target.value)}
+              className="cliente-input"
+              style={{ flex: "0 0 220px" }}
+            />
+            <button onClick={cargarClientes}>Cargar</button>
+            <button onClick={() => { setCedulaOriginal(""); setClienteEditar({ cedula: "", nombre: "", telefono: "" }); }} >
+              Limpiar
+            </button>
+         
+
+          {/* Form de edición */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <input
+              placeholder="Nueva cédula"
+              value={clienteEditar.cedula}
+              onChange={e => setClienteEditar({ ...clienteEditar, cedula: e.target.value })}
+              className="cliente-input"
+            />
+            <input
+              placeholder="Nombre"
+              value={clienteEditar.nombre}
+              onChange={e => setClienteEditar({ ...clienteEditar, nombre: e.target.value })}
+              className="cliente-input"
+            />
+            <input
+              placeholder="Teléfono"
+              value={clienteEditar.telefono}
+              onChange={e => setClienteEditar({ ...clienteEditar, telefono: e.target.value })}
+              className="cliente-input"
+            />
+            <div />
+          </div>
+
+          <div >
+            <button
+              onClick={handleEditarCliente}
+              disabled={cargandoEdicion}
+              style={{ padding: "10px 18px" }}
+            >
+              {cargandoEdicion ? "Guardando..." : "Guardar cambios"}
+            </button>
+          </div>
+        </div>
         </div>
           <div className="cliente-card">
           {error && (
-            <div style={{ 
-              color: 'red', 
-              padding: 10, 
-              marginBottom: 20, 
-              border: '1px solid red',
-              backgroundColor: '#ffebee'
-            }}>
+            <div >
               Error: {error}
               <button onClick={cargarClientes} style={{ marginLeft: 10 }}>
                 Reintentar
