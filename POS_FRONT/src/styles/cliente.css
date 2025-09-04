@@ -9,21 +9,21 @@ body {
   padding: 40px;
 }
 
-.cliente-card {
-  background-color: #4f63be;
-  padding: 20px; 
-  color: white;
-  font-family: Arial, sans-serif ;
-  font-size: 20px;
-  border-radius: 10px;
-  border: 2px solid black;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 900px; 
-  display: flex;
-  flex-direction: column;
 
+.cliente-cards-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px; 
+  flex-wrap: wrap; 
 }
+
+.cliente-card, .cliente-card-edit, .cliente-card1 { 
+  flex: 1; 
+  max-width: 30%;
+  box-sizing: border-box; 
+  height: 250px;
+}
+
 
 .cliente-title {
   font-weight: bold;
@@ -137,8 +137,6 @@ body {
   background-color: #dc3545;
 }
 
-
-
 .cliente-card1 {
   background-color: #4f63be;
   padding: 20px; 
@@ -148,12 +146,9 @@ body {
   border-radius: 10px;
   border: 2px solid black;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 900px; 
   display: flex;
   flex-direction: column;
-  gap: 15px; /* Espaciado automático entre elementos internos */
-  margin-top: 10px;
+  justify-content: space-between;
 }
 
 .cliente-card1 input {
@@ -245,6 +240,8 @@ body {
   font-weight: 700;
   cursor: pointer;
   border: 2px solid black;
+  margin-Bottom: "12px";
+  gap: 12 
 }
 
 
