@@ -1,11 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
-<<<<<<< HEAD
 import "./styles/Login.css"; 
-=======
-import "./styles/Login.css";
->>>>>>> 12c81f1be66b5468071d46a56809ab42196d76e3
 
 const supabaseUrl = 'https://xunxhvkgyirimhcwzzhj.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1bnhodmtneWlyaW1oY3d6emhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwNzA5NzUsImV4cCI6MjA3MTY0Njk3NX0.ewDrdnuaB4Uz34mldXLhdqnTF1wNHSWQp3wZHA3O5tQ'; // ⚠️ reemplazar con tu anon key
@@ -25,12 +21,7 @@ export default function Login() {
     navigate("/Clientes");
 
   };
-
-<<<<<<< HEAD
-  return (
-=======
     return (
->>>>>>> 12c81f1be66b5468071d46a56809ab42196d76e3
     <div className="login-container">
       <div className="login-card">
         <h2 className="login-title">Iniciar sesión</h2>
