@@ -19,6 +19,21 @@ async function handleResponse(response) {
 }
 
 // ==========================
+// Usuario actual
+// ==========================
+export async function getUsuarioActual() {
+  try {
+    const res = await fetch(`${API_URL}/me`, { 
+      headers: getAuthHeader() 
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error al obtener usuario actual:", error);
+    return { error: error.message };
+  }
+}
+
+// ==========================
 // CLIENTES
 // ==========================
 export async function getClientes() {
