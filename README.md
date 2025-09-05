@@ -3,7 +3,7 @@
 ## Integrantes
 - Julio Mazo
 - Sebastian Castro Obando
-- Maria ?????????
+- Maria ¿Camila Guzma Bolaños
 - Samuel Escobar
 - J ??????
 
