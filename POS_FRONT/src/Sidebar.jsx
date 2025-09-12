@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getUsuarioActual } from "./api";
 import "./styles/Layout.css";
+import { FaUserTie, FaUsers, FaBoxes, FaShoppingCart, FaChartLine, FaSignOutAlt } from "react-icons/fa";
 
 export default function Sidebar() {
   const [usuario, setUsuario] = useState(null);
@@ -33,34 +34,53 @@ export default function Sidebar() {
         <ul>
           {isAdmin && (
             <li>
-              <Link to="/empleados">Empleados</Link>
+              <Link to="/empleados">
+                <FaUserTie className="sidebar-icon" />
+                <span>Empleados</span>
+              </Link>
             </li>
           )}
           <li>
-            <Link to="/clientes">Clientes</Link>
+            <Link to="/clientes">
+              <FaUsers className="sidebar-icon" />
+              <span>Clientes</span>
+            </Link>
           </li>
           {isAdmin && (
             <li>
-              <Link to="/productos">Productos</Link>
+              <Link to="/productos">
+                <FaBoxes className="sidebar-icon" />
+                <span>Productos</span>
+              </Link>
             </li>
           )}
           <li>
-            <Link to="/ventas">Ventas</Link>
+            <Link to="/ventas">
+              <FaShoppingCart className="sidebar-icon" />
+              <span>Ventas</span>
+            </Link>
           </li>
           {isAdmin && (
             <>
               <li>
-                <Link to="/detalle-ventas">Detalle Ventas</Link>
+                <Link to="/detalle-ventas">
+                  <FaShoppingCart className="sidebar-icon" />
+                  <span>Detalle Ventas</span>
+                </Link>
               </li>
               <li>
-                <Link to="/graficas">Gráficas</Link>
+                <Link to="/graficas">
+                  <FaChartLine className="sidebar-icon" />
+                  <span>Gráficas</span>
+                </Link>
               </li>
             </>
           )}
         </ul>
       </nav>
       <button className="logout-btn" onClick={handleLogout}>
-        Cerrar Sesión
+        <FaSignOutAlt className="sidebar-icon" />
+        <span>Cerrar Sesión</span>
       </button>
     </aside>
   );

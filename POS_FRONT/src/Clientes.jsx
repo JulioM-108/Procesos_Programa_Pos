@@ -11,7 +11,7 @@ export default function Clientes() {
   const [busqueda, setBusqueda] = useState("");
   const [tipoBusqueda, setTipoBusqueda] = useState("cedula");
   const [paginaActual, setPaginaActual] = useState(1);
-  const clientesPorPagina = 5;
+  const clientesPorPagina = 10;
   const navigate = useNavigate();
 
   const [cedulaEliminar, setCedulaEliminar] = useState("");
@@ -353,7 +353,11 @@ const handleEditarCliente = async () => {
                 <td>{cli.nombre}</td>
                 <td>{cli.telefono || "N/A"}</td>
                 <td>{cli.puntos || 0}</td>
-                <td>{cli.estado}</td>
+                <td>
+                  <span className={`estado-badge ${cli.estado ? 'activo' : 'inactivo'}`}>
+                    {cli.estado ? 'Activo' : 'Inactivo'}
+                  </span>
+                </td>
                 <td>
                   {cli.fecha_registro
                     ? new Date(cli.fecha_registro).toLocaleString()

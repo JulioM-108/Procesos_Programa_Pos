@@ -41,15 +41,16 @@ body {
 .login-card input[type="password"] {
   width: 100%;
   padding: 12px;
-  border: none;
   border-radius: 5px;
   font-size: 1rem;
   border: 2px solid black;
+  box-sizing: border-box;
+  margin-bottom: 10px;
 }
 
 .login-card button {
   align-items: center;
-  width: 106%;
+  width: 100%;
   padding: 12px;
   border: none;
   border-radius: 5px;

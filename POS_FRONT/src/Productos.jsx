@@ -234,7 +234,11 @@ export default function Productos() {
               <td>{p.cantidad}</td>
               <td>{p.precio}</td>
               <td>{p.categoria}</td>
-              <td>{p.estado ? "Activo" : "Inactivo"}</td>
+              <td>
+                <span className={`estado-badge ${p.estado ? 'activo' : 'inactivo'}`}>
+                  {p.estado ? 'Activo' : 'Inactivo'}
+                </span>
+              </td>
               <td>
                 <button onClick={() => setProductoEdit(p)}>Editar</button>
                 <button onClick={() => handleToggleEstado(p)}>
