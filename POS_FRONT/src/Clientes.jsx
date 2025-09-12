@@ -5,8 +5,13 @@ import "./styles/cliente.css";
 
 export default function Clientes() {
   const [clientes, setClientes] = useState([]);
+  const [clientesFiltrados, setClientesFiltrados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [busqueda, setBusqueda] = useState("");
+  const [tipoBusqueda, setTipoBusqueda] = useState("cedula");
+  const [paginaActual, setPaginaActual] = useState(1);
+  const clientesPorPagina = 5;
   const navigate = useNavigate();
 
   const [cedulaEliminar, setCedulaEliminar] = useState("");
@@ -28,6 +33,35 @@ export default function Clientes() {
   useEffect(() => {
     cargarClientes();
   }, []);
+
+  // Efecto para filtrar clientes
+  useEffect(() => {
+    if (!busqueda) {
+      setClientesFiltrados(clientes);
+      return;
+    }
+
+    const filtrados = clientes.filter(cliente => {
+      const valor = cliente[tipoBusqueda].toString().toLowerCase();
+      return valor.includes(busqueda.toLowerCase());
+    });
+    setClientesFiltrados(filtrados);
+    setPaginaActual(1); // Reset a la primera página cuando se filtra
+  }, [busqueda, tipoBusqueda, clientes]);
+
+  // Lógica de paginación
+  const indiceUltimoCliente = paginaActual * clientesPorPagina;
+  const indicePrimerCliente = indiceUltimoCliente - clientesPorPagina;
+  const clientesActuales = clientesFiltrados.slice(indicePrimerCliente, indiceUltimoCliente);
+  const totalPaginas = Math.ceil(clientesFiltrados.length / clientesPorPagina);
+
+  const cambiarPagina = (direccion) => {
+    if (direccion === 'anterior' && paginaActual > 1) {
+      setPaginaActual(paginaActual - 1);
+    } else if (direccion === 'siguiente' && paginaActual < totalPaginas) {
+      setPaginaActual(paginaActual + 1);
+    }
+  };
 
   const cargarClientes = async () => {
     try {
@@ -272,9 +306,28 @@ const handleEditarCliente = async () => {
         </div>
       </div>
       <h2 className="cliente-title">
-        Clientes Existentes ({clientes.length})
+        Clientes Existentes ({clientesFiltrados.length})
       </h2>
-      {clientes.length === 0 ? (
+
+      <div className="cliente-busqueda">
+        <select 
+          value={tipoBusqueda} 
+          onChange={(e) => setTipoBusqueda(e.target.value)}
+          className="cliente-select"
+        >
+          <option value="cedula">Buscar por Cédula</option>
+          <option value="nombre">Buscar por Nombre</option>
+        </select>
+        <input
+          type="text"
+          placeholder={`Buscar por ${tipoBusqueda}...`}
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          className="cliente-input-busqueda"
+        />
+      </div>
+
+      {clientesFiltrados.length === 0 ? (
         <p>No hay clientes registrados.</p>
       ) : (
         <table
@@ -294,7 +347,7 @@ const handleEditarCliente = async () => {
             </tr>
           </thead>
           <tbody>
-            {clientes.map(cli => (
+            {clientesActuales.map(cli => (
               <tr key={cli.cedula}>
                 <td>{cli.cedula}</td>
                 <td>{cli.nombre}</td>
@@ -310,6 +363,28 @@ const handleEditarCliente = async () => {
             ))}
           </tbody>
         </table>
+      )}
+      
+      {clientesFiltrados.length > 0 && (
+        <div className="paginacion">
+          <button 
+            onClick={() => cambiarPagina('anterior')} 
+            disabled={paginaActual === 1}
+            className="paginacion-btn"
+          >
+            Anterior
+          </button>
+          <span className="paginacion-info">
+            Página {paginaActual} de {totalPaginas}
+          </span>
+          <button 
+            onClick={() => cambiarPagina('siguiente')} 
+            disabled={paginaActual === totalPaginas}
+            className="paginacion-btn"
+          >
+            Siguiente
+          </button>
+        </div>
       )}
     </div>
   );

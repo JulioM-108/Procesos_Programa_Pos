@@ -189,7 +189,23 @@ router.get("/productos", async (req, res) => {
   if (error) return res.status(400).json({ error: error.message });
   res.json(data);
 });
+// GET /api/productos/categorias
+router.get("/productos/categorias", async (req, res) => {
+  const supabase = getSupabaseClient(req);
 
+  // obtener las categorías distintas
+  const { data, error } = await supabase
+    .from("productos")
+    .select("categoria")
+    .not("categoria", "is", null);
+
+  if (error) return res.status(400).json({ error: error.message });
+
+  // extraer únicas
+  const categoriasUnicas = [...new Set(data.map(p => p.categoria))];
+
+  res.json(categoriasUnicas);
+});
 router.post("/productos", async (req, res) => {
   const supabase = getSupabaseClient(req);
   const { data, error } = await supabase.from("productos").insert([req.body]).select();
@@ -243,6 +259,44 @@ router.put("/producto", async (req, res) => {
     return res.status(500).json({
       message: "Error al actualizar el producto"
     });
+  }
+});
+
+// PUT /api/productos/:id/estado
+router.put("/productos/:id/estado", async (req, res) => {
+  try {
+    const supabase = getSupabaseClient(req);
+    const { estado } = req.body;
+    const { id } = req.params;
+
+    if (typeof estado !== "boolean") {
+      return res.status(400).json({
+        message: "El campo 'estado' debe ser booleano (true/false)",
+      });
+    }
+
+    const { data, error } = await supabase
+      .from("productos")
+      .update({ estado })
+      .eq("id_producto", id)
+      .select();
+
+    if (error) {
+      console.error("Error al actualizar estado:", error);
+      return res.status(500).json({ message: "Error al actualizar estado", error: error.message });
+    }
+
+    if (!data || data.length === 0) {
+      return res.status(404).json({ message: `No se encontró producto con id ${id}` });
+    }
+
+    return res.json({
+      message: "Estado del producto actualizado correctamente",
+      producto: data[0],
+    });
+  } catch (e) {
+    console.error("Excepción en PUT /productos/:id/estado:", e);
+    return res.status(500).json({ message: "Error inesperado al actualizar estado" });
   }
 });
 // ==========================

@@ -120,6 +120,62 @@ export async function postProducto(producto) {
   }
 }
 
+// Crear producto
+export async function createProducto(producto) {
+  const res = await fetch(`${API_URL}/productos`, {
+    method: "POST",
+//    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeader(), // ✅ incluye Authorization
+    body: JSON.stringify(producto),
+  });
+  if (!res.ok) throw new Error("Error al crear producto");
+  return res.json();
+}
+
+// Editar producto
+export async function updateProducto(producto) {
+  try {
+    const res = await fetch(`${API_URL}/producto`, {
+      method: "PUT",
+      headers: getAuthHeader(), // ✅ incluye Authorization
+      body: JSON.stringify(producto),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error al actualizar producto:", error);
+    return { error: error.message };
+  }
+}
+
+
+// Cambiar estado (activar/desactivar)
+export async function toggleEstadoProducto(id_producto, estadoActual) {
+  try {
+    const res = await fetch(`${API_URL}/producto`, {
+      method: "PUT",
+      headers: getAuthHeader(),
+      body: JSON.stringify({ id_producto, estado: !estadoActual }),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error al cambiar estado:", error);
+    return { error: error.message };
+  }
+}
+// ==========================
+// CATEGORIAS (únicas desde productos)
+// ==========================
+export async function getCategorias() {
+  try {
+    const res = await fetch(`${API_URL}/productos/categorias`, {
+      headers: getAuthHeader(),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error al obtener categorías:", error);
+    return { error: error.message };
+  }
+}
 // ==========================
 // VENTAS
 // ==========================
