@@ -79,6 +79,7 @@ export async function putCliente(cedula, cliente) {
 // ==========================
 // EMPLEADOS
 // ==========================
+// Obtener todos los empleados
 export async function getEmpleados() {
   try {
     const res = await fetch(`${API_URL}/empleados`, { 
@@ -87,6 +88,34 @@ export async function getEmpleados() {
     return await handleResponse(res);
   } catch (error) {
     console.error('Error al obtener empleados:', error);
+    return { error: error.message };
+  }
+}
+// Crear nuevo empleado (incluye crear usuario en auth)
+export async function postEmpleado(empleado) {
+  try {
+    const res = await fetch(`${API_URL}/empleados/register`, {
+      method: "POST",
+      headers: getAuthHeader(),
+      body: JSON.stringify(empleado),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error al crear empleado:", error);
+    return { error: error.message };
+  }
+}
+// Editar empleado existente (solo tabla empleados, no auth)
+export async function putEmpleado(id_empleado, empleado) {
+  try {
+    const res = await fetch(`${API_URL}/empleados/${id_empleado}`, {
+      method: "PUT",
+      headers: getAuthHeader(),
+      body: JSON.stringify(empleado),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error al actualizar empleado:", error);
     return { error: error.message };
   }
 }

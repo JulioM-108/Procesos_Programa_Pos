@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getEmpleados } from "./api";
+import { getEmpleados, postEmpleado, putEmpleado } from "./api";
 import "./styles/Empleados.css";
 
 export default function Empleados() {
@@ -8,6 +8,18 @@ export default function Empleados() {
   const [error, setError] = useState(null);
   const [busqueda, setBusqueda] = useState("");
   const [filtroRol, setFiltroRol] = useState("");
+  // Formulario empleado
+  const [form, setForm] = useState({
+    cedula: "",
+    nombre: "",
+    rol: "cajero",
+    telefono: "",
+    email: "",
+    password: "",
+    estado: 1
+  });
+    const [editId, setEditId] = useState(null);
+    const [formError, setFormError] = useState("");
 
   // Paginación
   const [paginaActual, setPaginaActual] = useState(1);
@@ -38,8 +50,81 @@ export default function Empleados() {
     const coincideNombre = empleado.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
                          empleado.cedula.toLowerCase().includes(busqueda.toLowerCase());
     const coincideRol = filtroRol ? empleado.rol === filtroRol : true;
-    return coincideNombre && coincideRol;
-  });
+      return coincideNombre && coincideRol;
+    });
+
+      // Manejar cambios en el formulario
+      const handleFormChange = e => {
+        const { name, value, type } = e.target;
+        setForm(f => ({
+          ...f,
+          [name]: type === "checkbox" ? (e.target.checked ? 1 : 0) : value
+        }));
+      };
+
+      // Crear empleado
+      const handleCrear = async e => {
+        e.preventDefault();
+        setFormError("");
+        if (!form.email || !form.password || !form.cedula || !form.nombre) {
+          setFormError("Completa todos los campos obligatorios");
+          return;
+        }
+        const res = await postEmpleado(form);
+        if (res.error) {
+          setFormError(res.error);
+        } else {
+          setForm({ cedula: "", nombre: "", rol: "cajero", telefono: "", email: "", password: "", estado: 1 });
+          cargarEmpleados();
+        }
+      };
+
+      // Editar empleado
+      const handleEditar = async e => {
+        e.preventDefault();
+        setFormError("");
+        if (!form.cedula || !form.nombre || !form.email) {
+          setFormError("Completa todos los campos obligatorios");
+          return;
+        }
+        const res = await putEmpleado(editId, { ...form, password: undefined });
+        if (res.error) {
+          setFormError(res.error);
+        } else {
+          setEditId(null);
+          setForm({ cedula: "", nombre: "", rol: "cajero", telefono: "", email: "", password: "", estado: 1 });
+          cargarEmpleados();
+        }
+      };
+
+      // Cargar datos en el form para editar
+      const handleSetEdit = empleado => {
+        setEditId(empleado.id_empleado);
+        setForm({
+          cedula: empleado.cedula,
+          nombre: empleado.nombre,
+          rol: empleado.rol,
+          telefono: empleado.telefono || "",
+          email: empleado.email,
+          password: "",
+          estado: empleado.estado
+        });
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+
+      // Cancelar edición
+      const handleCancelEdit = () => {
+        setEditId(null);
+        setForm({ cedula: "", nombre: "", rol: "cajero", telefono: "", email: "", password: "", estado: 1 });
+        setFormError("");
+      };
+
+      // Cambiar estado empleado
+      const handleToggleEstado = async empleado => {
+        const nuevoEstado = empleado.estado ? 0 : 1;
+        await putEmpleado(empleado.id_empleado, { ...empleado, estado: nuevoEstado });
+        cargarEmpleados();
+      };
 
   // Paginación
   const indexUltimo = paginaActual * empleadosPorPagina;
@@ -67,6 +152,29 @@ export default function Empleados() {
         </select>
       </div>
 
+      {/* Formulario crear/editar empleado */}
+      <form className="empleado-form" onSubmit={editId ? handleEditar : handleCrear}>
+        <h2>{editId ? "Editar Empleado" : "Crear Empleado"}</h2>
+        <div className="form-row">
+          <input name="cedula" type="text" placeholder="Cédula*" value={form.cedula} onChange={handleFormChange} required />
+          <input name="nombre" type="text" placeholder="Nombre*" value={form.nombre} onChange={handleFormChange} required />
+          <select name="rol" value={form.rol} onChange={handleFormChange} required>
+            <option value="administrador">Administrador</option>
+            <option value="cajero">Cajero</option>
+          </select>
+          <input name="telefono" type="text" placeholder="Teléfono" value={form.telefono} onChange={handleFormChange} />
+          <input name="email" type="email" placeholder="Email*" value={form.email} onChange={handleFormChange} required />
+          {!editId && (
+            <input name="password" type="password" placeholder="Password*" value={form.password} onChange={handleFormChange} required />
+          )}
+        </div>
+        {formError && <div className="form-error">{formError}</div>}
+        <div className="form-actions">
+          <button type="submit" className="form-btn">{editId ? "Guardar Cambios" : "Crear Empleado"}</button>
+          {editId && <button type="button" className="form-btn cancel" onClick={handleCancelEdit}>Cancelar</button>}
+        </div>
+      </form>
+
       {/* Tabla de empleados */}
       <h2 className="empleados-subtitle">
         Lista de Empleados ({empleadosFiltrados.length})
@@ -91,6 +199,7 @@ export default function Empleados() {
             <th>Teléfono</th>
             <th>Email</th>
             <th>Estado</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -105,6 +214,15 @@ export default function Empleados() {
                 <span className={`estado-badge ${empleado.estado ? 'activo' : 'inactivo'}`}>
                   {empleado.estado ? 'Activo' : 'Inactivo'}
                 </span>
+              </td>
+              <td>
+                <button className="action-btn edit-btn" onClick={() => handleSetEdit(empleado)}>Editar</button>
+                <button
+                  className="action-btn toggle-btn"
+                  onClick={() => handleToggleEstado(empleado)}
+                >
+                  {empleado.estado ? 'Desactivar' : 'Activar'}
+                </button>
               </td>
             </tr>
           ))}
@@ -136,3 +254,4 @@ export default function Empleados() {
     </div>
   );
 }
+

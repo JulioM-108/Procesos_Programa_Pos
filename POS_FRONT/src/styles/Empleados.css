@@ -158,3 +158,113 @@
   color: white;
   font-weight: bold;
 }
+
+/* ===== FORMULARIO DE EMPLEADOS ===== */
+.empleado-form {
+  background: #4f63be;
+  border: 2px solid black;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 32px;
+  color: white;
+  box-sizing: border-box;
+}
+
+.empleado-form h2 {
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 16px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.form-row input,
+.form-row select {
+  display: block;
+  width: auto;
+  min-width: 140px;
+  margin: 0;
+  padding: 10px;
+  border: 2px solid black;
+  border-radius: 5px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  background: #fff;
+  color: #222;
+}
+
+.form-row input::placeholder {
+  color: #888;
+}
+
+.estado-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  color: #fff;
+  margin-left: 8px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.form-btn {
+  background: #007bff;
+  color: #fff;
+  border: 2px solid black;
+  border-radius: 5px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.form-btn.cancel {
+  background: #bbb;
+  color: #222;
+}
+
+.form-btn:hover {
+  background: #dc3545;
+}
+
+.form-error {
+  color: #ffd600;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.action-btn {
+  background: #007bff;
+  color: #fff;
+  border: 2px solid black;
+  border-radius: 5px;
+  padding: 6px 14px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-right: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.action-btn:hover {
+  background: #dc3545;
+}
+
+.toggle-btn {
+  background: #007bff;
+}
+
+.edit-btn {
+  background: #007bff;
+}

@@ -10,6 +10,8 @@ export default function DetalleVentas() {
   const [error, setError] = useState(null);
   const [tipoBusqueda, setTipoBusqueda] = useState("empleado");
   const [terminoBusqueda, setTerminoBusqueda] = useState("");
+    const [fechaInicio, setFechaInicio] = useState("");
+    const [fechaFin, setFechaFin] = useState("");
 
   // Paginación
   const [paginaActual, setPaginaActual] = useState(1);
@@ -67,18 +69,29 @@ export default function DetalleVentas() {
   };
 
   // Filtrado de detalles
-  const detallesFiltrados = detallesCompletos.filter(detalle => {
-    if (!terminoBusqueda) return true;
-    
-    const busqueda = terminoBusqueda.toLowerCase();
-    if (tipoBusqueda === 'empleado') {
-      return detalle.empleado?.nombre?.toLowerCase().includes(busqueda) ||
-             detalle.empleado?.cedula?.toLowerCase().includes(busqueda);
-    } else {
-      return detalle.cliente?.nombre?.toLowerCase().includes(busqueda) ||
-             detalle.cliente?.cedula?.toLowerCase().includes(busqueda);
-    }
-  });
+    const detallesFiltrados = detallesCompletos.filter(detalle => {
+      // Filtrar por fecha si se selecciona
+      let fechaValida = true;
+      if (fechaInicio) {
+        fechaValida = new Date(detalle.created_at) >= new Date(fechaInicio);
+      }
+      if (fechaFin) {
+        fechaValida = fechaValida && new Date(detalle.created_at) <= new Date(fechaFin);
+      }
+
+      // Filtrar por texto
+      if (!terminoBusqueda) return fechaValida;
+      const busqueda = terminoBusqueda.toLowerCase();
+      let textoValido = false;
+      if (tipoBusqueda === 'empleado') {
+        textoValido = detalle.empleado?.nombre?.toLowerCase().includes(busqueda) ||
+                     detalle.empleado?.cedula?.toLowerCase().includes(busqueda);
+      } else {
+        textoValido = detalle.cliente?.nombre?.toLowerCase().includes(busqueda) ||
+                     detalle.cliente?.cedula?.toLowerCase().includes(busqueda);
+      }
+      return textoValido && fechaValida;
+    });
 
   // Paginación
   const indexUltimo = paginaActual * itemsPorPagina;
@@ -111,7 +124,7 @@ export default function DetalleVentas() {
       </h2>
 
       {/* Barra de búsqueda */}
-      <div className="search-container">
+      <div className="search-container-flex">
         <input
           type="text"
           placeholder={`Buscar por ${tipoBusqueda === 'empleado' ? 'nombre/cédula del empleado' : 'nombre/cédula del cliente'}`}
@@ -119,6 +132,26 @@ export default function DetalleVentas() {
           onChange={(e) => setTerminoBusqueda(e.target.value)}
           className="search-input"
         />
+        <div className="fecha-busqueda">
+          <label>
+            Desde:
+            <input
+              type="date"
+              value={fechaInicio}
+              onChange={e => setFechaInicio(e.target.value)}
+              className="fecha-input"
+            />
+          </label>
+          <label>
+            Hasta:
+            <input
+              type="date"
+              value={fechaFin}
+              onChange={e => setFechaFin(e.target.value)}
+              className="fecha-input"
+            />
+          </label>
+        </div>
       </div>
 
       <table className="detalle-table">

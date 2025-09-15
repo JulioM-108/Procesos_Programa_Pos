@@ -4,7 +4,8 @@ import { createClient } from "@supabase/supabase-js";
 const router = express.Router();
 
 const supabaseUrl = "https://xunxhvkgyirimhcwzzhj.supabase.co";
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1bnhodmtneWlyaW1oY3d6emhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwNzA5NzUsImV4cCI6MjA3MTY0Njk3NX0.ewDrdnuaB4Uz34mldXLhdqnTF1wNHSWQp3wZHA3O5tQ'; // ⚠️ NO usar service_role aquí
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1bnhodmtneWlyaW1oY3d6emhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwNzA5NzUsImV4cCI6MjA3MTY0Njk3NX0.ewDrdnuaB4Uz34mldXLhdqnTF1wNHSWQp3wZHA3O5tQ'; // Anon public
+const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1bnhodmtneWlyaW1oY3d6emhqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjA3MDk3NSwiZXhwIjoyMDcxNjQ2OTc1fQ.je5NFsJNzN8dBuVI1EB23XSkpAS2rjxElLVUdhJCTkE' // Service role (secreto, no usar en frontend)
 
 // ==========================
 // Helper para crear cliente Supabase con JWT del usuario
@@ -42,6 +43,101 @@ router.get("/me", async (req, res) => {
 
 // ==========================
 // EMPLEADOS
+// ==========================
+// ==========================
+// SECCION CRITICA SERVICE ROLE KEY
+// ==========================
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+// Crear nuevos empleados (y usuarios en Auth)
+router.post("/empleados/register", async (req, res) => {
+  try {
+    const { email, password, nombre, rol, cedula, telefono, estado } = req.body;
+
+    // 1. Crear usuario en Supabase Auth
+    const { data: user, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true
+    });
+
+    if (authError) {
+      console.error("Error en auth:", authError);
+      return res.status(400).json({ error: authError.message });
+    }
+
+    // 2. Insertar empleado en tu tabla (estado: 1 activo por defecto)
+    const { data: empleado, error: dbError } = await supabaseAdmin
+      .from("empleados")
+      .insert([
+        {
+          user_id: user.user.id,
+          cedula,
+          nombre,
+          rol,
+          telefono: telefono || null,
+          email,
+          estado: estado ?? 1   // 👈 1 = activo, 0 = inactivo
+        }
+      ])
+      .select();
+
+    if (dbError) {
+      console.error("Error en DB:", dbError);
+      return res.status(400).json({ error: dbError.message });
+    }
+
+    res.json({
+      message: "Empleado creado correctamente",
+      empleado: empleado[0]
+    });
+  } catch (err) {
+    console.error("Error en /empleados/register:", err);
+    res.status(500).json({ error: "Error inesperado" });
+  }
+});
+
+//Editar empleados (Solo datos del empleado, no auth)
+router.put("/empleados/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombre, rol, cedula, telefono, email, estado } = req.body;
+
+    const fields = { nombre, rol, cedula, telefono, email, estado };
+
+    // limpiar nulls/undefined
+    Object.keys(fields).forEach((k) => {
+      if (fields[k] === undefined) delete fields[k];
+    });
+
+    if (Object.keys(fields).length === 0) {
+      return res.status(400).json({ error: "No se enviaron campos para actualizar" });
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from("empleados")
+      .update(fields)
+      .eq("id_empleado", id)
+      .select();
+
+    if (error) return res.status(400).json({ error: error.message });
+
+    if (!data || data.length === 0) {
+      return res.status(404).json({ error: `Empleado con id ${id} no encontrado` });
+    }
+
+    res.json({
+      message: "Empleado actualizado correctamente",
+      empleado: data[0],
+    });
+  } catch (err) {
+    console.error("Error en PUT /empleados/:id:", err);
+    res.status(500).json({ error: "Error inesperado al actualizar empleado" });
+  }
+});
+
+
+// ==========================
+// SECCION CRITICA SERVICE ROLE KEY
 // ==========================
 router.get("/empleados", async (req, res) => {
   const supabase = getSupabaseClient(req);

@@ -26,6 +26,7 @@ export default function Sidebar() {
   if (!usuario) return null;
 
   const isAdmin = usuario.rol === "administrador";
+    const isCajero = usuario.rol === "cajero";
 
   return (
     <aside className="sidebar">
@@ -60,22 +61,22 @@ export default function Sidebar() {
               <span>Ventas</span>
             </Link>
           </li>
-          {isAdmin && (
-            <>
+            {(
               <li>
                 <Link to="/detalle-ventas">
                   <FaShoppingCart className="sidebar-icon" />
                   <span>Detalle Ventas</span>
                 </Link>
               </li>
+            )}
+            {isAdmin && (
               <li>
                 <Link to="/graficas">
                   <FaChartLine className="sidebar-icon" />
                   <span>Gráficas</span>
                 </Link>
               </li>
-            </>
-          )}
+            )}
         </ul>
       </nav>
       <button className="logout-btn" onClick={handleLogout}>
