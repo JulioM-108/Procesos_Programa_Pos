@@ -197,7 +197,7 @@ router.post("/productos", async (req, res) => {
   res.json(data);
 });
 //          /api/producto
-router.put("/producto", async (req, res) => {
+router.put("/productos", async (req, res) => {
   try {
     const { id_producto, ...fields } = req.body;
 
