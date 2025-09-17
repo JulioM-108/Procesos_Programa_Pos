@@ -79,6 +79,7 @@ export async function putCliente(cedula, cliente) {
 // ==========================
 // EMPLEADOS
 // ==========================
+// Obtener todos los empleados
 export async function getEmpleados() {
   try {
     const res = await fetch(`${API_URL}/empleados`, { 
@@ -87,6 +88,34 @@ export async function getEmpleados() {
     return await handleResponse(res);
   } catch (error) {
     console.error('Error al obtener empleados:', error);
+    return { error: error.message };
+  }
+}
+// Crear nuevo empleado (incluye crear usuario en auth)
+export async function postEmpleado(empleado) {
+  try {
+    const res = await fetch(`${API_URL}/empleados/register`, {
+      method: "POST",
+      headers: getAuthHeader(),
+      body: JSON.stringify(empleado),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error al crear empleado:", error);
+    return { error: error.message };
+  }
+}
+// Editar empleado existente (solo tabla empleados, no auth)
+export async function putEmpleado(id_empleado, empleado) {
+  try {
+    const res = await fetch(`${API_URL}/empleados/${id_empleado}`, {
+      method: "PUT",
+      headers: getAuthHeader(),
+      body: JSON.stringify(empleado),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error al actualizar empleado:", error);
     return { error: error.message };
   }
 }
@@ -120,6 +149,62 @@ export async function postProducto(producto) {
   }
 }
 
+// Crear producto
+export async function createProducto(producto) {
+  const res = await fetch(`${API_URL}/productos`, {
+    method: "POST",
+//    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeader(), // ✅ incluye Authorization
+    body: JSON.stringify(producto),
+  });
+  if (!res.ok) throw new Error("Error al crear producto");
+  return res.json();
+}
+
+// Editar producto
+export async function updateProducto(producto) {
+  try {
+    const res = await fetch(`${API_URL}/producto`, {
+      method: "PUT",
+      headers: getAuthHeader(), // ✅ incluye Authorization
+      body: JSON.stringify(producto),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error al actualizar producto:", error);
+    return { error: error.message };
+  }
+}
+
+
+// Cambiar estado (activar/desactivar)
+export async function toggleEstadoProducto(id_producto, estadoActual) {
+  try {
+    const res = await fetch(`${API_URL}/producto`, {
+      method: "PUT",
+      headers: getAuthHeader(),
+      body: JSON.stringify({ id_producto, estado: !estadoActual }),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error al cambiar estado:", error);
+    return { error: error.message };
+  }
+}
+// ==========================
+// CATEGORIAS (únicas desde productos)
+// ==========================
+export async function getCategorias() {
+  try {
+    const res = await fetch(`${API_URL}/productos/categorias`, {
+      headers: getAuthHeader(),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error al obtener categorías:", error);
+    return { error: error.message };
+  }
+}
 // ==========================
 // VENTAS
 // ==========================

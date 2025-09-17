@@ -4,7 +4,7 @@ import productosQuery  from "./busquedaProducto.js";
 import ventasQuery from "./consultarFacturas.js";
 import reportes from "./reportes.js"
 import express from "express";
-import cors from "cors"; // Instala: npm install cors
+import cors from "cors"; 
 
 const app = express();
 

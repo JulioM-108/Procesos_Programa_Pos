@@ -1,0 +1,211 @@
+/* ===== CONTENEDOR PRINCIPAL ===== */
+.productos-container {
+  background-color: #3f51b5;
+  font-family: Arial, sans-serif;
+  padding: 40px;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* ===== TITULO PRINCIPAL ===== */
+.producto-title {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  border: 2px solid black;
+  padding: 10px 20px;
+  background-color: #4f63be;
+  display: inline-block;
+  border-radius: 10px;
+  color: white;
+}
+
+/* ===== FORMULARIOS (crear y editar) ===== */
+.producto-forms {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.producto-form {
+  background-color: #4f63be;
+  padding: 20px;
+  border-radius: 10px;
+  border: 2px solid black;
+  flex: 1;
+  min-width: 320px;
+  max-width: 45%;
+  color: white;
+  box-sizing: border-box;
+}
+
+.producto-form h2 {
+  margin-bottom: 10px;
+}
+
+.producto-form input,
+.producto-form select {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+  padding: 10px;
+  border: 2px solid black;
+  border-radius: 5px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.producto-form button {
+  margin-top: 10px;
+  width: 100%;
+  padding: 12px;
+  border: 2px solid black;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.producto-form button:hover {
+  background-color: #dc3545;
+}
+
+/* ===== SUBTITULOS ===== */
+.producto-subtitle {
+  margin: 20px 0 10px;
+  border: 2px solid black;
+  padding: 10px 20px;
+  background-color: #4f63be;
+  display: inline-block;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+}
+
+/* ===== BARRA DE BÚSQUEDA ===== */
+.producto-busqueda {
+  display: flex;
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.producto-busqueda input {
+  flex: 2;
+  padding: 10px;
+  border: 2px solid black;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.producto-busqueda select {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid black;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+/* ===== TABLA DE PRODUCTOS ===== */
+.producto-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  color: black;
+  border: 2px solid black;
+}
+
+.producto-table thead tr {
+  background-color: #1a237e;
+  color: white;
+}
+
+.producto-table th,
+.producto-table td {
+  border: 1px solid black;
+  padding: 10px;
+  text-align: center;
+}
+
+.producto-table tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.producto-table tbody tr:hover {
+  background-color: #e0e0e0;
+}
+
+/* ===== BOTONES DE TABLA ===== */
+.producto-table button {
+  padding: 6px 12px;
+  border: 2px solid black;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 2px;
+  transition: background-color 0.3s ease;
+}
+
+.producto-table button:hover {
+  background-color: #dc3545;
+}
+
+/* ===== BADGES DE ESTADO ===== */
+.estado-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.estado-badge.activo {
+  background-color: #28a745;
+  color: white;
+}
+
+.estado-badge.inactivo {
+  background-color: #dc3545;
+  color: white;
+}
+
+/* ===== PAGINACIÓN ===== */
+.paginacion {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-top: 20px;
+  padding: 20px 0;
+}
+
+.paginacion-btn {
+  padding: 10px 20px;
+  border: 2px solid black;
+  border-radius: 6px;
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.paginacion-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.paginacion-btn:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.paginacion-info {
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+}
