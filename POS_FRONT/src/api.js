@@ -277,3 +277,53 @@ export async function getHistorialPuntos() {
     return { error: error.message };
   }
 }
+
+// ------------------
+// MANEJO DE REPORTES
+// ------------------
+export async function getTopProductos(desde, hasta, limite = 10) {
+  try {
+    const params = new URLSearchParams();
+    if (desde) params.append("desde", desde);
+    if (hasta) params.append("hasta", hasta);
+    params.append("limite", String(limite));
+
+    const res = await fetch(`${API_URL}/reportes/top_productos?${params.toString()}`, {
+      headers: getAuthHeader(),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error al obtener top productos:", error);
+    return { error: error.message };
+  }
+}
+
+export async function getClientesFrecuentes(desde, hasta, limite = 10) {
+  try {
+    const params = new URLSearchParams();
+    if (desde) params.append("desde", desde);
+    if (hasta) params.append("hasta", hasta);
+    params.append("limite", String(limite));
+
+    const res = await fetch(`${API_URL}/reportes/clientes_frecuentes?${params.toString()}`, {
+      headers: getAuthHeader(),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error al obtener clientes frecuentes:", error);
+    return { error: error.message };
+  }
+}
+
+export async function getListadoVentas(meses = 3) {
+  try {
+    const res = await fetch(`${API_URL}/reportes/listado_ventas?meses=${meses}`, {
+      headers: getAuthHeader(),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error al obtener listado ventas:", error);
+    return { error: error.message };
+  }
+}
+// // --- SIN ---

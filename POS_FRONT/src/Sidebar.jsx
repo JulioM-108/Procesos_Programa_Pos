@@ -3,6 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { getUsuarioActual } from "./api";
 import "./styles/Layout.css";
 import { FaUserTie, FaUsers, FaBoxes, FaShoppingCart, FaChartLine, FaSignOutAlt } from "react-icons/fa";
+// import GraficaVentas from "./GraficaVentas";
+
+// <Route path="/graficas" element={<GraficaVentas />} />
 
 export default function Sidebar() {
   const [usuario, setUsuario] = useState(null);
@@ -65,17 +68,16 @@ export default function Sidebar() {
               <li>
                 <Link to="/detalle-ventas">
                   <FaShoppingCart className="sidebar-icon" />
-                  <span>Detalle Ventas</span>
+                  <span>Historial Ventas</span>
                 </Link>
               </li>
             )}
             {isAdmin && (
               <li>
                 <Link to="/graficas">
-                  <FaChartLine className="sidebar-icon" />
-                  <span>Gráficas</span>
+                <span>📊 Gráficas</span>
                 </Link>
-              </li>
+            </li>
             )}
         </ul>
       </nav>

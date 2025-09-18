@@ -8,6 +8,8 @@ import UserInfo from "./userInfo";
 import LayoutBase from "./LayoutBase";
 import DetalleVentas from "./DetalleVentas";
 import Empleados from "./Empleados";
+// import GraficaTopProductos from "./GraficaTopProductos";
+import Reportes from "./reportes";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -19,7 +21,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           <Route path="/productos" element={<Productos />} />
           <Route path="/ventas" element={<h1>Ventas</h1>} />
           <Route path="/detalle-ventas" element={<DetalleVentas />} />
-          <Route path="/graficas" element={<h1>Gráficas</h1>} />
+          <Route path="/graficas" element={<Reportes />} />
           <Route path="/empleados" element={<Empleados />} />
           <Route path="/userInfo" element={<UserInfo />} />
         </Route>
