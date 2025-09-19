@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
   LabelList,
 } from "recharts";
+import "./styles/Graficas.css";
 
 export default function GraficaTopProductos() {
   const [data, setData] = useState([]);

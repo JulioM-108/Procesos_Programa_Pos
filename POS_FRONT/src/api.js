@@ -2,20 +2,111 @@ const API_URL = "http://localhost:3000/api";
 
 function getAuthHeader() {
   const token = localStorage.getItem("token");
-  return { 
-    "Authorization": `Bearer ${token}`, 
-    "Content-Type": "application/json" 
+  return {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
   };
 }
 
-// Helper para manejar respuestas
+// Helper para manejar respuestas (mejor manejo de errores y preserva todo el JSON)
 async function handleResponse(response) {
+  // Intentar parsear JSON (defensivo)
+  const data = await response.json().catch(() => null);
+
   if (!response.ok) {
-    const errorData = await response.json();
-    console.error('Error en la respuesta:', errorData);
-    return { error: errorData.error || 'Error desconocido' };
+    // Imprime el objeto completo que venga del backend para depuración
+    console.error("Error en la respuesta:", data || response.statusText);
+    // Devuelve todo el objeto de respuesta (no solo data.error) para que el front pueda
+    // inspeccionar propiedades como `factors`, `needsMfa`, etc.
+    return data || { error: response.statusText || "Error desconocido" };
   }
-  return await response.json();
+
+  return data;
+}
+
+
+
+// ==========================
+// AUTENTICACIÓN Y MFA
+// ==========================
+export async function login(email, password, mfaCode = null) {
+  try {
+    const res = await fetch(`${API_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, mfaCode }),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error al iniciar sesión:", error);
+    return { error: error.message };
+  }
+}
+
+export async function enrollMFA() {
+  try {
+    const res = await fetch(`${API_URL}/auth/mfa/enroll`, {
+      method: "POST",
+      headers: getAuthHeader(),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error al enrolar MFA:", error);
+    return { error: error.message };
+  }
+}
+
+export async function verifyMFA(factorId, code) {
+  try {
+    const res = await fetch(`${API_URL}/auth/mfa/verify`, {
+      method: "POST",
+      headers: getAuthHeader(),
+      body: JSON.stringify({ factorId, code }),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error al verificar MFA:", error);
+    return { error: error.message };
+  }
+}
+
+export async function getMfaFactors() {
+  try {
+    const res = await fetch(`${API_URL}/auth/mfa/factors`, {
+      headers: getAuthHeader(),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error al obtener factores MFA:", error);
+    return { error: error.message };
+  }
+}
+
+export async function unenrollMFA(factorId) {
+  try {
+    const res = await fetch(`${API_URL}/auth/mfa/unenroll`, {
+      method: "POST",
+      headers: getAuthHeader(),
+      body: JSON.stringify({ factorId }),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error al desenrolar MFA:", error);
+    return { error: error.message };
+  }
+}
+
+export async function logout() {
+  try {
+    const res = await fetch(`${API_URL}/auth/logout`, {
+      method: "POST",
+      headers: getAuthHeader(),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error al cerrar sesión:", error);
+    return { error: error.message };
+  }
 }
 
 // ==========================
@@ -23,8 +114,8 @@ async function handleResponse(response) {
 // ==========================
 export async function getUsuarioActual() {
   try {
-    const res = await fetch(`${API_URL}/me`, { 
-      headers: getAuthHeader() 
+    const res = await fetch(`${API_URL}/me`, {
+      headers: getAuthHeader(),
     });
     return await handleResponse(res);
   } catch (error) {
@@ -38,12 +129,12 @@ export async function getUsuarioActual() {
 // ==========================
 export async function getClientes() {
   try {
-    const res = await fetch(`${API_URL}/clientes`, { 
-      headers: getAuthHeader() 
+    const res = await fetch(`${API_URL}/clientes`, {
+      headers: getAuthHeader(),
     });
     return await handleResponse(res);
   } catch (error) {
-    console.error('Error al obtener clientes:', error);
+    console.error("Error al obtener clientes:", error);
     return { error: error.message };
   }
 }
@@ -53,11 +144,11 @@ export async function postCliente(cliente) {
     const res = await fetch(`${API_URL}/clientes`, {
       method: "POST",
       headers: getAuthHeader(),
-      body: JSON.stringify(cliente)
+      body: JSON.stringify(cliente),
     });
     return await handleResponse(res);
   } catch (error) {
-    console.error('Error al crear cliente:', error);
+    console.error("Error al crear cliente:", error);
     return { error: error.message };
   }
 }
@@ -67,11 +158,11 @@ export async function putCliente(cedula, cliente) {
     const res = await fetch(`${API_URL}/clientes/${cedula}`, {
       method: "PUT",
       headers: getAuthHeader(),
-      body: JSON.stringify(cliente)
+      body: JSON.stringify(cliente),
     });
     return await handleResponse(res);
   } catch (error) {
-    console.error('Error al actualizar cliente:', error);
+    console.error("Error al actualizar cliente:", error);
     return { error: error.message };
   }
 }
@@ -79,19 +170,18 @@ export async function putCliente(cedula, cliente) {
 // ==========================
 // EMPLEADOS
 // ==========================
-// Obtener todos los empleados
 export async function getEmpleados() {
   try {
-    const res = await fetch(`${API_URL}/empleados`, { 
-      headers: getAuthHeader() 
+    const res = await fetch(`${API_URL}/empleados`, {
+      headers: getAuthHeader(),
     });
     return await handleResponse(res);
   } catch (error) {
-    console.error('Error al obtener empleados:', error);
+    console.error("Error al obtener empleados:", error);
     return { error: error.message };
   }
 }
-// Crear nuevo empleado (incluye crear usuario en auth)
+
 export async function postEmpleado(empleado) {
   try {
     const res = await fetch(`${API_URL}/empleados/register`, {
@@ -105,7 +195,7 @@ export async function postEmpleado(empleado) {
     return { error: error.message };
   }
 }
-// Editar empleado existente (solo tabla empleados, no auth)
+
 export async function putEmpleado(id_empleado, empleado) {
   try {
     const res = await fetch(`${API_URL}/empleados/${id_empleado}`, {
@@ -125,12 +215,12 @@ export async function putEmpleado(id_empleado, empleado) {
 // ==========================
 export async function getProductos() {
   try {
-    const res = await fetch(`${API_URL}/productos`, { 
-      headers: getAuthHeader() 
+    const res = await fetch(`${API_URL}/productos`, {
+      headers: getAuthHeader(),
     });
     return await handleResponse(res);
   } catch (error) {
-    console.error('Error al obtener productos:', error);
+    console.error("Error al obtener productos:", error);
     return { error: error.message };
   }
 }
@@ -140,33 +230,30 @@ export async function postProducto(producto) {
     const res = await fetch(`${API_URL}/productos`, {
       method: "POST",
       headers: getAuthHeader(),
-      body: JSON.stringify(producto)
+      body: JSON.stringify(producto),
     });
     return await handleResponse(res);
   } catch (error) {
-    console.error('Error al crear producto:', error);
+    console.error("Error al crear producto:", error);
     return { error: error.message };
   }
 }
 
-// Crear producto
 export async function createProducto(producto) {
   const res = await fetch(`${API_URL}/productos`, {
     method: "POST",
-//    headers: { "Content-Type": "application/json" },
-    headers: getAuthHeader(), // ✅ incluye Authorization
+    headers: getAuthHeader(),
     body: JSON.stringify(producto),
   });
   if (!res.ok) throw new Error("Error al crear producto");
   return res.json();
 }
 
-// Editar producto
 export async function updateProducto(producto) {
   try {
     const res = await fetch(`${API_URL}/producto`, {
       method: "PUT",
-      headers: getAuthHeader(), // ✅ incluye Authorization
+      headers: getAuthHeader(),
       body: JSON.stringify(producto),
     });
     return await handleResponse(res);
@@ -176,8 +263,6 @@ export async function updateProducto(producto) {
   }
 }
 
-
-// Cambiar estado (activar/desactivar)
 export async function toggleEstadoProducto(id_producto, estadoActual) {
   try {
     const res = await fetch(`${API_URL}/producto`, {
@@ -191,8 +276,9 @@ export async function toggleEstadoProducto(id_producto, estadoActual) {
     return { error: error.message };
   }
 }
+
 // ==========================
-// CATEGORIAS (únicas desde productos)
+// CATEGORIAS
 // ==========================
 export async function getCategorias() {
   try {
@@ -205,17 +291,18 @@ export async function getCategorias() {
     return { error: error.message };
   }
 }
+
 // ==========================
 // VENTAS
 // ==========================
 export async function getVentas() {
   try {
-    const res = await fetch(`${API_URL}/ventas`, { 
-      headers: getAuthHeader() 
+    const res = await fetch(`${API_URL}/ventas`, {
+      headers: getAuthHeader(),
     });
     return await handleResponse(res);
   } catch (error) {
-    console.error('Error al obtener ventas:', error);
+    console.error("Error al obtener ventas:", error);
     return { error: error.message };
   }
 }
@@ -225,11 +312,11 @@ export async function postVenta(venta) {
     const res = await fetch(`${API_URL}/ventas`, {
       method: "POST",
       headers: getAuthHeader(),
-      body: JSON.stringify(venta)
+      body: JSON.stringify(venta),
     });
     return await handleResponse(res);
   } catch (error) {
-    console.error('Error al crear venta:', error);
+    console.error("Error al crear venta:", error);
     return { error: error.message };
   }
 }
@@ -239,12 +326,12 @@ export async function postVenta(venta) {
 // ==========================
 export async function getDetalleVenta(id_venta) {
   try {
-    const res = await fetch(`${API_URL}/ventas/${id_venta}/detalle`, { 
-      headers: getAuthHeader() 
+    const res = await fetch(`${API_URL}/ventas/${id_venta}/detalle`, {
+      headers: getAuthHeader(),
     });
     return await handleResponse(res);
   } catch (error) {
-    console.error('Error al obtener detalle de venta:', error);
+    console.error("Error al obtener detalle de venta:", error);
     return { error: error.message };
   }
 }
@@ -254,11 +341,11 @@ export async function postDetalleVenta(id_venta, detalle) {
     const res = await fetch(`${API_URL}/ventas/${id_venta}/detalle`, {
       method: "POST",
       headers: getAuthHeader(),
-      body: JSON.stringify(detalle)
+      body: JSON.stringify(detalle),
     });
     return await handleResponse(res);
   } catch (error) {
-    console.error('Error al crear detalle de venta:', error);
+    console.error("Error al crear detalle de venta:", error);
     return { error: error.message };
   }
 }
@@ -268,19 +355,19 @@ export async function postDetalleVenta(id_venta, detalle) {
 // ==========================
 export async function getHistorialPuntos() {
   try {
-    const res = await fetch(`${API_URL}/historial_puntos`, { 
-      headers: getAuthHeader() 
+    const res = await fetch(`${API_URL}/historial_puntos`, {
+      headers: getAuthHeader(),
     });
     return await handleResponse(res);
   } catch (error) {
-    console.error('Error al obtener historial de puntos:', error);
+    console.error("Error al obtener historial de puntos:", error);
     return { error: error.message };
   }
 }
 
-// ------------------
-// MANEJO DE REPORTES
-// ------------------
+// ==========================
+// REPORTES
+// ==========================
 export async function getTopProductos(desde, hasta, limite = 10) {
   try {
     const params = new URLSearchParams();
@@ -326,4 +413,4 @@ export async function getListadoVentas(meses = 3) {
     return { error: error.message };
   }
 }
-// // --- SIN ---
+

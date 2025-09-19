@@ -207,9 +207,6 @@ const handleEditarCliente = async () => {
     <div className="cliente-container">
       <div className="cliente-header">
         <h1 className="cliente-title2">Gestión de Clientes</h1>
-        <button className="cliente-logout" onClick={handleLogout}>
-          Cerrar Sesión
-        </button>
       </div>
 
       <div className="cliente-cards-container">
@@ -300,7 +297,7 @@ const handleEditarCliente = async () => {
             placeholder="Cédula"
             value={cedulaEliminar}
             onChange={e => setCedulaEliminar(e.target.value)}
-            className="cliente-input1"
+            className="cliente-input"
           />
           <button  onClick={handleEliminarCliente}>Eliminar Cliente</button>
         </div>

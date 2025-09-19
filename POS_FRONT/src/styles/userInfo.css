@@ -1,0 +1,61 @@
+.user-info-wrapper {
+  margin-left: 300px; /* deja espacio para el sidebar */
+  padding: 20px;
+}
+
+.user-info-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 25px;
+  max-width: 450px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.user-info-card h2,
+.user-info-card h3,
+.user-info-card h4 {
+  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+.user-info-card p {
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #34495e;
+}
+
+.mfa-btn, .unenroll-btn {
+  background: #3498db;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.3s ease;
+}
+
+.mfa-btn:hover, .unenroll-btn:hover {
+  background: #2980b9;
+}
+
+.mfa-qr img {
+  margin-top: 10px;
+  max-width: 180px;
+}
+
+.mfa-input {
+  margin-top: 10px;
+}
+
+.mfa-input input {
+  padding: 6px 8px;
+  margin-right: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.error {
+  color: red;
+  margin-top: 10px;
+}

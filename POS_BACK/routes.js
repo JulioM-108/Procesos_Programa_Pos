@@ -528,4 +528,160 @@ router.get("/historial_puntos", async (req, res) => {
   res.json(data);
 });
 
+// ==========================
+// NUEVAS RUTAS PARA AUTH Y MFA (AGREGADAS SIN ELIMINAR NADA EXISTENTE)
+// ==========================
+// Login con soporte para MFA (usa anon key ya que es pre-auth)
+router.post("/auth/login", async (req, res) => {
+  const { email, password, mfaCode } = req.body;
+
+  // Crea cliente con anon key para login
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+  // Paso 1: Login con email/password
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    return res.status(401).json({ success: false, error: error.message });
+  }
+
+  // Consultar empleado (como en tu lógica existente)
+  const { data: empleado, error: empleadoError } = await supabase
+    .from("empleados")
+    .select("id_empleado, nombre, rol")
+    .eq("user_id", data.user.id)
+    .single();
+
+  if (empleadoError) {
+    return res.status(400).json({ success: false, error: empleadoError.message });
+  }
+
+  // Paso 2: Listar factores MFA (con el token recién obtenido)
+  const supabaseWithToken = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: `Bearer ${data.session.access_token}` } },
+  });
+  const { data: factorsData, error: factorsError } = await supabaseWithToken.auth.mfa.listFactors();
+  if (factorsError) {
+    return res.status(500).json({ success: false, error: factorsError.message });
+  }
+  const factors = factorsData.totp || [];
+
+  if (factors.length > 0 && mfaCode) {
+    // MFA requerido y código proporcionado
+    const factorId = factors[0].id; // Primer factor por simplicidad
+    const { data: challengeData, error: challengeError } = await supabaseWithToken.auth.mfa.challenge({ factorId });
+    if (challengeError) {
+      return res.status(400).json({ success: false, error: challengeError.message });
+    }
+
+    const { data: verifyData, error: verifyError } = await supabaseWithToken.auth.mfa.verify({
+      factorId,
+      challengeId: challengeData.id,
+      code: mfaCode,
+    });
+    if (verifyError) {
+      return res.status(400).json({ success: false, error: verifyError.message });
+    }
+
+    // Refrescar sesión para AAL2
+    const { data: sessionData } = await supabaseWithToken.auth.getSession();
+    return res.json({
+      success: true,
+      user: data.user,
+      session: sessionData.session,
+      empleado,
+    });
+  } else if (factors.length > 0 && !mfaCode) {
+    // MFA requerido pero no proporcionado
+    return res.status(401).json({ success: false, error: "MFA requerido. Proporcione el código TOTP.", needsMfa: true, factors: factors.map(f => ({ id: f.id, status: f.status })) });
+  }
+
+  // Sin MFA
+  return res.json({
+    success: true,
+    user: data.user,
+    session: data.session,
+    empleado,
+  });
+});
+
+// Enroll MFA (requiere token, usa getSupabaseClient)
+router.post("/auth/mfa/enroll", async (req, res) => {
+  const supabase = getSupabaseClient(req);
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) return res.status(401).json({ error: "Usuario no autenticado" });
+
+  const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' });
+  if (error) return res.status(400).json({ success: false, error: error.message });
+
+  return res.json({
+    success: true,
+    factorId: data.id,
+    secret: data.totp.secret,
+    qr: data.totp.qr_code, // SVG para renderizar en img
+    uri: data.totp.uri,
+  });
+});
+
+// Verify enroll o login MFA (requiere token)
+router.post("/auth/mfa/verify", async (req, res) => {
+  const supabase = getSupabaseClient(req);
+  const { factorId, code } = req.body;
+  if (!factorId || !code) return res.status(400).json({ error: "factorId y code requeridos" });
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) return res.status(401).json({ error: "Usuario no autenticado" });
+
+  const { data: challengeData, error: challengeError } = await supabase.auth.mfa.challenge({ factorId });
+  if (challengeError) return res.status(400).json({ success: false, error: challengeError.message });
+
+  const { data, error } = await supabase.auth.mfa.verify({
+    factorId,
+    challengeId: challengeData.id,
+    code,
+  });
+  if (error) return res.status(400).json({ success: false, error: error.message });
+
+  return res.json({ success: true });
+});
+
+// Listar factores MFA (requiere token)
+router.get("/auth/mfa/factors", async (req, res) => {
+  const supabase = getSupabaseClient(req);
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) return res.status(401).json({ error: "Usuario no autenticado" });
+
+  const { data, error } = await supabase.auth.mfa.listFactors();
+  if (error) return res.status(400).json({ success: false, error: error.message });
+
+  return res.json({ success: true, factors: data.totp || [] });
+});
+
+// Desenrolar MFA (requiere token)
+router.post("/auth/mfa/unenroll", async (req, res) => {
+  const supabase = getSupabaseClient(req);
+  const { factorId } = req.body;
+  if (!factorId) return res.status(400).json({ error: "factorId requerido" });
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) return res.status(401).json({ error: "Usuario no autenticado" });
+
+  const { error } = await supabase.auth.mfa.unenroll({ factorId });
+  if (error) return res.status(400).json({ success: false, error: error.message });
+
+  return res.json({ success: true });
+});
+
+// Logout (requiere token)
+router.post("/auth/logout", async (req, res) => {
+  const supabase = getSupabaseClient(req);
+  const { error } = await supabase.auth.signOut();
+  if (error) return res.status(400).json({ success: false, error: error.message });
+
+  return res.json({ success: true });
+});
+
 export default router;

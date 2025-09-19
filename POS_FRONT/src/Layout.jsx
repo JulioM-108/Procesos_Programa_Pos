@@ -18,7 +18,6 @@ export default function Layout() {
       }
       setLoading(false);
     }
-
     fetchUsuario();
   }, []);
 
@@ -34,42 +33,26 @@ export default function Layout() {
 
   return (
     <div className="layout-container">
+      {/* Sidebar siempre visible */}
       <aside className="sidebar">
         <h2 className="sidebar-title">Menú</h2>
         <nav>
           <ul>
-            {isAdmin && (
-              <li>
-                <Link to="/empleados">Empleados</Link>
-              </li>
-            )}
-            <li>
-              <Link to="/clientes">Clientes</Link>
-            </li>
-            {isAdmin && (
-              <li>
-                <Link to="/productos">Productos</Link>
-              </li>
-            )}
-            <li>
-              <Link to="/ventas">Ventas</Link>
-            </li>
-            {isAdmin && (
-              <>
-                <li>
-                  <Link to="/detalle-ventas">Detalle Ventas</Link>
-                </li>
-                <li>
-                  <Link to="/graficas">Gráficas</Link>
-                </li>
-              </>
-            )}
+            {isAdmin && <li><Link to="/empleados">Empleados</Link></li>}
+            <li><Link to="/clientes">Clientes</Link></li>
+            {isAdmin && <li><Link to="/productos">Productos</Link></li>}
+            <li><Link to="/ventas">Ventas</Link></li>
+            {isAdmin && <>
+              <li><Link to="/detalle-ventas">Detalle Ventas</Link></li>
+              <li><Link to="/graficas">Gráficas</Link></li>
+            </>}
+            <li><Link to="/userInfo">Información de Usuario</Link></li>
           </ul>
         </nav>
-        <button className="logout-btn" onClick={handleLogout}>
-          Cerrar Sesión
-        </button>
+        <button className="logout-btn" onClick={handleLogout}>Cerrar Sesión</button>
       </aside>
+
+      {/* Contenido principal */}
       <main className="content">
         <Outlet />
       </main>

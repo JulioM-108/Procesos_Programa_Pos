@@ -1,84 +1,335 @@
+/* Layout.css - Diseño moderno con tema gris */
+
 .layout-container {
   display: flex;
   min-height: 100vh;
-  background-color: #3f51b5;
-  font-family: Arial, sans-serif;
+  /* 🎨 Fondo gris elegante con textura sutil */
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef, #f1f3f4);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
+/* Sidebar moderna */
 .sidebar {
   position: fixed;
   left: 0;
   top: 0;
   bottom: 0;
-  width: 220px;
-  background: #1a237e;
+  width: 280px;
+  /* Gradiente gris sofisticado */
+  background: linear-gradient(180deg, 
+    #2c3e50 0%, 
+    #34495e 50%, 
+    #2c3e50 100%);
+  
   color: white;
-  padding: 20px;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+  padding: 25px 20px;
+  
+  /* Sombra elegante */
+  box-shadow: 
+    4px 0 20px rgba(0, 0, 0, 0.15),
+    4px 0 8px rgba(0, 0, 0, 0.1);
+  
+  /* Efecto de vidrio sutil */
+  backdrop-filter: blur(10px);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  
+  /* Animación suave al cargar */
+   animation: none; 
+   transform: none;
 }
 
-.main-content {
-  margin-left: 220px;
-  padding: 20px;
+/* Animación de entrada del sidebar */
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 .sidebar-title {
-  font-size: 1.5rem;
-  margin-bottom: 30px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 35px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
   text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  
+  /* Gradiente en el texto */
+  background: linear-gradient(45deg, #ffffff, #ecf0f1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Lista de navegación */
+.sidebar nav {
+  flex: 1;
 }
 
 .sidebar ul {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
 .sidebar ul li {
-  margin: 8px 0;
+  margin: 6px 0;
 }
 
 .sidebar ul li a {
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: white;
-  font-weight: bold;
-  padding: 12px 15px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  color: #ecf0f1;
+  font-weight: 500;
+  font-size: 15px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
+/* Efecto hover elegante */
 .sidebar ul li a:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  transform: translateX(5px);
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(8px);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
+/* Efecto activo */
+.sidebar ul li a.active {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+/* Efecto ripple en los links */
+.sidebar ul li a::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.4s, height 0.4s;
+  z-index: -1;
+}
+
+.sidebar ul li a:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Iconos (si decides agregarlos después) */
 .sidebar-icon {
   margin-right: 12px;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
 }
 
+.sidebar ul li a:hover .sidebar-icon {
+  opacity: 1;
+}
+
+/* Botón de logout moderno */
 .logout-btn {
   position: absolute;
-  bottom: 20px;
+  bottom: 25px;
   left: 20px;
   right: 20px;
-  padding: 12px;
-  background-color: #dc3545;
+  padding: 14px 20px;
+  
+  /* Gradiente rojo elegante */
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
   color: white;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
   cursor: pointer;
+  
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  
+  /* Animaciones */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+  
+  /* Efecto de presionado */
+  transform-style: preserve-3d;
 }
 
 .logout-btn:hover {
-  background-color: #c82333;
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, #c0392b, #a93226);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+}
+
+.logout-btn:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+}
+
+/* Área de contenido principal */
+.content {
+  margin-left: 280px;
+  padding: 30px;
+  flex: 1;
+  min-height: 100vh;
+  
+  /* Fondo con textura sutil */
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(5px);
+  
+  /* Animación de entrada */
+  animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+/* Animación del contenido */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estados de carga */
+.layout-container p {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-size: 18px;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 220px; /* puedes hacerla más angosta en móvil */
+    position: fixed;
+    z-index: 1000;
+    transform: none; /* 👈 QUITAMOS el translateX */
+  }
+  
+  .content {
+    margin-left: 220px; /* 👈 que coincida con el nuevo ancho */
+    padding: 20px 15px;
+  }
+
+  /* 👇 ELIMINA por completo esta parte si existe */
+  /* .menu-toggle { ... } */
+}
+
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    position: fixed;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .sidebar.active {
+    transform: translateX(0);
+  }
+  
+  .content {
+    margin-left: 0;
+    padding: 20px 15px;
+  }
+  
+  /* Botón hamburguesa (necesitarás agregarlo al JS) */
+  .menu-toggle {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    background: #2c3e50;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+}
+
+/* Scrollbar personalizada para el sidebar */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Micro-interacciones */
+.sidebar ul li {
+  animation: fadeInLeft 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+.sidebar ul li:nth-child(1) { animation-delay: 0.1s; }
+.sidebar ul li:nth-child(2) { animation-delay: 0.2s; }
+.sidebar ul li:nth-child(3) { animation-delay: 0.3s; }
+.sidebar ul li:nth-child(4) { animation-delay: 0.4s; }
+.sidebar ul li:nth-child(5) { animation-delay: 0.5s; }
+.sidebar ul li:nth-child(6) { animation-delay: 0.6s; }
+.sidebar ul li:nth-child(7) { animation-delay: 0.7s; }
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Mejora para el estado de loading */
+.layout-container .loading-spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #2c3e50;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
