@@ -10,6 +10,7 @@ import DetalleVentas from "./DetalleVentas";
 import Empleados from "./Empleados";
 // import GraficaTopProductos from "./GraficaTopProductos";
 import Reportes from "./reportes";
+import Ventas from "./Ventas";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -19,7 +20,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Route element={<LayoutBase />}>
           <Route path="/clientes" element={<Clientes />} />
           <Route path="/productos" element={<Productos />} />
-          <Route path="/ventas" element={<h1>Ventas</h1>} />
+          <Route path="/ventas" element={<Ventas/>} />
           <Route path="/detalle-ventas" element={<DetalleVentas />} />
           <Route path="/graficas" element={<Reportes />} />
           <Route path="/empleados" element={<Empleados />} />

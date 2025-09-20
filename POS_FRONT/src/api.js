@@ -277,6 +277,20 @@ export async function toggleEstadoProducto(id_producto, estadoActual) {
   }
 }
 
+export async function busquedaProductoNombre(querytxt) {
+  try {
+    const res = await fetch(
+      `${API_URL}/productos/query_name?query=${encodeURIComponent(querytxt)}`,
+      {
+        headers: getAuthHeader(),
+      }
+    );
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error al obtener productos:", error);
+    return { error: error.message };
+  }
+}
 // ==========================
 // CATEGORIAS
 // ==========================

@@ -1,0 +1,300 @@
+.ventas-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+/* =====================
+   TITULOS
+===================== */
+.carrito h2,
+.busqueda h2 {
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #222;
+}
+
+/* =====================
+   CARRITO
+===================== */
+.carrito {
+  flex: 1;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.carrito input {
+  width: 100%;
+  padding: 8px;
+  margin: 6px 0 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.tabla-carrito {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  background: #fff;
+  font-size: 12px; /* 🔹 Compacta */
+}
+
+.tabla-carrito th,
+.tabla-carrito td {
+  border: 1px solid #ddd;
+  padding: 5px; /* 🔹 Menos padding */
+  text-align: center;
+}
+
+.tabla-carrito th {
+  background: #f8f9fa;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.tabla-carrito td button {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 3px 5px; /* 🔹 Más pequeño */
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.tabla-carrito td button:hover {
+  background: #b02a37;
+}
+
+.carrito h3 {
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #222;
+}
+
+.btn-registrar {
+  background: #28a745;
+  color: white;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  margin-top: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.btn-registrar:hover {
+  background: #218838;
+}
+
+/* =====================
+   BUSQUEDA
+===================== */
+.busqueda {
+  flex: 2;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.buscador {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px 0 20px;
+}
+
+.buscador input {
+  padding: 8px;
+  width: 60%;
+  margin-right: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 13px;
+}
+
+.buscador button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.buscador button:hover {
+  background: #0056b3;
+}
+
+.resultados {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* 🔹 más pequeño */
+  gap: 12px;
+  margin-top: 15px;
+}
+
+/* =====================
+   PRODUCTOS (Targets más pequeños)
+===================== */
+.producto-card {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px; /* 🔹 menos padding */
+  background: #fff;
+  text-align: center;
+  font-size: 12px; /* 🔹 más pequeño */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.producto-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+.producto-card h3 {
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: #222;
+}
+
+.producto-card .descripcion {
+  font-size: 11px;
+  color: #666;
+  margin: 3px 0;
+  min-height: 28px;
+}
+
+.producto-card p {
+  margin: 2px 0;
+  font-size: 11px;
+  color: #444;
+}
+
+.cantidad {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 6px 0;
+  gap: 4px;
+}
+
+.cantidad button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 3px 7px; /* 🔹 más pequeño */
+  font-size: 11px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cantidad button:disabled {
+  background: #9bbcf0;
+  cursor: not-allowed;
+}
+
+.producto-card > button {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 5px 8px; /* 🔹 más pequeño */
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  margin-top: 5px;
+}
+
+.producto-card > button:hover {
+  background: #218838;
+}
+
+.producto-card > button:disabled {
+  background: #b7d7bd;
+  cursor: not-allowed;
+}
+
+.estado-msg {
+  margin: 5px 0;
+  font-size: 11px;
+  color: #b02a37;
+}
+
+/* Tarjeta deshabilitada */
+.producto-card.deshabilitado {
+  background: #f0f0f0;
+  color: #999;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+/* =====================
+   PAGINACION
+===================== */
+.paginacion {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.paginacion button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 5px 9px;
+  margin: 0 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.paginacion button:hover {
+  background: #0056b3;
+}
+
+.paginacion button:disabled {
+  background: #9bbcf0;
+  cursor: not-allowed;
+}
+
+.paginacion span {
+  font-size: 12px;
+  margin: 0 8px;
+}
+
+/* =====================
+   MENSAJES DE VENTA
+===================== */
+.mensaje-venta {
+  margin-top: 10px;
+  padding: 8px;
+  border-radius: 6px;
+  font-weight: bold;
+  text-align: center;
+  font-size: 13px;
+}
+
+.mensaje-exito {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.mensaje-error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
