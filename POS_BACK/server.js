@@ -22,3 +22,6 @@ const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
+
+//const facturaRoutes = require('./routes/factura');
+//app.use('/factura', facturaRoutes);
