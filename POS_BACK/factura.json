@@ -1,0 +1,89 @@
+const express = require('express');
+const router = express.Router();
+const PDFDocument = require('pdfkit');
+const { createClient } = require('@supabase/supabase-js');
+
+// inicializar Supabase (ajusta con tus credenciales/env vars)
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
+
+router.get('/:ventaId/pdf', async (req, res) => {
+  try {
+    const ventaId = req.params.ventaId;
+
+    // 1. Obtener datos de la venta
+    const { data: venta, error: ventaError } = await supabase
+      .from('ventas')
+      .select('*')
+      .eq('id', ventaId)
+      .single();
+    if (ventaError || !venta) {
+      return res.status(404).json({ error: 'Venta no encontrada' });
+    }
+
+    // 2. Obtener datos del cliente
+    const { data: cliente, error: clienteError } = await supabase
+      .from('clientes')
+      .select('*')
+      .eq('id', venta.cliente_id)  // o el nombre de columna que uses
+      .single();
+    if (clienteError || !cliente) {
+      return res.status(404).json({ error: 'Cliente no encontrado' });
+    }
+
+    // 3. Obtener detalle de venta
+    const { data: detalle, error: detalleError } = await supabase
+      .from('detalle_ventas')  // ajusta nombre real de tabla
+      .select('producto, cantidad, precio_unitario')  // columnas reales
+      .eq('venta_id', ventaId);
+    if (detalleError) {
+      return res.status(500).json({ error: 'Error al obtener detalle' });
+    }
+
+    // 4. Preparar PDF
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=factura_${ventaId}.pdf`
+    );
+
+    const doc = new PDFDocument({ margin: 50 });
+    doc.pipe(res);
+
+    // Encabezado
+    doc.fontSize(20).text('FACTURA', { align: 'center' });
+    doc.moveDown();
+
+    // Datos de la venta / cliente
+    doc.fontSize(12)
+      .text(`Factura Nº: ${venta.id}`)
+      .text(`Cliente: ${cliente.nombre}`)  // ajusta nombre de campo
+      .text(`Fecha: ${new Date(venta.fecha).toLocaleDateString()}`)
+      .moveDown();
+
+    // Tabla de detalle
+    doc.fontSize(12).text('Detalle de productos:', { underline: true }).moveDown(0.5);
+
+    let total = 0;
+    detalle.forEach(item => {
+      const subtotal = item.cantidad * item.precio_unitario;
+      total += subtotal;
+      doc.text(
+        `${item.producto} — Cant: ${item.cantidad} — Precio Unidad: $${item.precio_unitario} — Subtotal: $${subtotal}`
+      );
+    });
+
+    // Total
+    doc.moveDown().fontSize(14).text(`TOTAL: $${total}`, { align: 'right' });
+
+    doc.end();
+
+  } catch (err) {
+    console.error('Error generando factura PDF:', err);
+    res.status(500).json({ error: 'Error generando factura PDF' });
+  }
+});
+
+module.exports = router;
