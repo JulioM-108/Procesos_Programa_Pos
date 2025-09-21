@@ -3,7 +3,10 @@ import {
   busquedaProductoNombre,
   postVenta,
   getUsuarioActual,
+  getClientes,
 } from "./api";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import "./styles/Ventas.css";
 
 export default function Ventas() {
@@ -20,6 +23,10 @@ export default function Ventas() {
   const [mensaje, setMensaje] = useState(null);
   const [tipoMensaje, setTipoMensaje] = useState(null);
   const [ventaFinalizada, setVentaFinalizada] = useState(false);
+  const [clientesList, setClientesList] = useState([]);
+  const [busquedaCliente, setBusquedaCliente] = useState("");
+  const [showClienteDropdown, setShowClienteDropdown] = useState(false);
+  const [idVentaGenerada, setIdVentaGenerada] = useState(""); // Guardar el id_venta al registrar la venta
 
   const porPagina = 6;
 
@@ -34,6 +41,15 @@ export default function Ventas() {
       }
     };
     fetchUsuario();
+  }, []);
+
+  // =========================
+  // Cargar clientes
+  // =========================
+  useEffect(() => {
+    getClientes().then((res) => {
+      if (Array.isArray(res)) setClientesList(res);
+    });
   }, []);
 
   // =========================
@@ -151,38 +167,39 @@ export default function Ventas() {
   // Registrar venta
   // =========================
   const handleRegistrarVenta = async () => {
-  if (!cliente.cedula || carrito.length === 0 || !usuario?.id_empleado) {
-    setMensaje("Faltan datos para registrar la venta");
-    setTipoMensaje("error");
+    if (!cliente.cedula || carrito.length === 0 || !usuario?.id_empleado) {
+      setMensaje("Faltan datos para registrar la venta");
+      setTipoMensaje("error");
+      ocultarMensaje();
+      return;
+    }
+    const venta = {
+      venta: {
+        cedula_cliente: cliente.cedula.trim(), // ✅ usamos el valor actualizado
+        id_empleado: usuario.id_empleado,
+        fecha_venta: new Date().toISOString(),
+      },
+      detalles: carrito.map((item) => ({
+        id_producto: item.codigo,
+        nombre_producto: item.nombre,
+        cantidad: item.cantidad,
+        precio_unitario: item.precio,
+      })),
+    };
+
+    const resp = await postVenta(venta);
+
+    if (resp && resp.message === "Venta creada correctamente") {
+      setMensaje(resp.message);
+      setTipoMensaje("exito");
+      setVentaFinalizada(true);
+      setIdVentaGenerada(resp.id_venta || ""); // Guardar el id_venta generado
+    } else {
+      setMensaje(resp?.message || "Error al registrar venta");
+      setTipoMensaje("error");
+    }
     ocultarMensaje();
-    return;
-  }
-  const venta = {
-    venta: {
-      cedula_cliente: cliente.cedula.trim(), // ✅ usamos el valor actualizado
-      id_empleado: usuario.id_empleado,
-      fecha_venta: new Date().toISOString(),
-    },
-    detalles: carrito.map((item) => ({
-      id_producto: item.codigo,
-      nombre_producto: item.nombre,
-      cantidad: item.cantidad,
-      precio_unitario: item.precio,
-    })),
   };
-
-  const resp = await postVenta(venta);
-
-  if (resp && resp.message === "Venta creada correctamente") {
-    setMensaje(resp.message);
-    setTipoMensaje("exito");
-    setVentaFinalizada(true);
-  } else {
-    setMensaje(resp?.message || "Error al registrar venta");
-    setTipoMensaje("error");
-  }
-  ocultarMensaje();
-};
 
   // =========================
   // Registrar nueva venta
@@ -227,6 +244,87 @@ export default function Ventas() {
     pagina * porPagina
   );
 
+  const generarFacturaPDF = () => {
+    if (!ventaFinalizada || !usuario || carrito.length === 0) return;
+    const doc = new jsPDF();
+
+    // Encabezado elegante
+    doc.setFontSize(22);
+    doc.setTextColor(40, 53, 181);
+    doc.text("FACTURA DE VENTA", 105, 20, { align: "center" });
+    doc.setDrawColor(40, 53, 181);
+    doc.line(20, 25, 190, 25);
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+
+    // Datos generales
+    doc.text(`Fecha: ${new Date().toLocaleString()}`, 20, 35);
+
+    // Cliente
+    doc.setFont(undefined, "bold");
+    doc.text("Cliente", 20, 52);
+    doc.setFont(undefined, "normal");
+    doc.text(`Nombre: ${cliente.nombre}`, 20, 58);
+    doc.text(`Cédula: ${cliente.cedula}`, 20, 64);
+    doc.text(`Teléfono: ${cliente.telefono || "-"}`, 20, 70);
+
+    // Cajero
+    doc.setFont(undefined, "bold");
+    doc.text("Cajero", 120, 52);
+    doc.setFont(undefined, "normal");
+    doc.text(`Nombre: ${usuario.nombre}`, 120, 58);
+    doc.text(`Email: ${usuario.email || "-"}`, 120, 64);
+
+    // Tabla de productos
+    autoTable(doc, {
+      startY: 80,
+      head: [["Producto", "Cantidad", "Precio Unitario", "Subtotal"]],
+      body: carrito.map((item) => [
+        item.nombre,
+        item.cantidad,
+        `$${item.precio.toFixed(2)}`,
+        `$${(item.precio * item.cantidad).toFixed(2)}`,
+      ]),
+      theme: "grid",
+      styles: { fontSize: 11 },
+      headStyles: { fillColor: [40, 53, 181], textColor: 255 },
+    });
+
+    // Totales
+    const subtotal = carrito.reduce(
+      (acc, item) => acc + item.precio * item.cantidad,
+      0
+    );
+    doc.setFont(undefined, "bold");
+    doc.text(`Subtotal: $${subtotal.toFixed(2)}`, 20, doc.lastAutoTable.finalY + 10);
+    doc.text(`Descuento: $0.00`, 20, doc.lastAutoTable.finalY + 18);
+    doc.text(`Total: $${subtotal.toFixed(2)}`, 20, doc.lastAutoTable.finalY + 26);
+    doc.setFont(undefined, "normal");
+
+    // Pie de página
+    doc.setFontSize(10);
+    doc.setTextColor(120, 120, 120);
+    doc.text(
+      "Gracias por su compra. Para reclamos presentar esta factura.",
+      105,
+      285,
+      { align: "center" }
+    );
+
+    doc.save("factura_venta.pdf");
+  };
+
+  const handleBuscarCliente = (e) => {
+    setBusquedaCliente(e.target.value);
+    setShowClienteDropdown(true);
+  };
+
+  const handleSelectCliente = (c) => {
+    setCliente({ nombre: c.nombre, cedula: c.cedula, telefono: c.telefono });
+    setBusquedaCliente("");
+    setShowClienteDropdown(false);
+  };
+
   return (
     <div className="ventas-container">
       {/* ================== CARRITO ================== */}
@@ -234,31 +332,63 @@ export default function Ventas() {
         <h2> Ventas </h2>
 
         {usuario && (
-        <ul className="empleado-info">
-            <li><strong>Nombre:</strong> {usuario.nombre}</li>
-            <li><strong>Rol:</strong> {usuario.rol === "administrador" ? "Administrador" : "Cajero"}</li>
+          <ul className="empleado-info">
+            <li>
+              <strong>Nombre:</strong> {usuario.nombre}
+            </li>
+            <li>
+              <strong>Rol:</strong>{" "}
+              {usuario.rol === "administrador" ? "Administrador" : "Cajero"}
+            </li>
           </ul>
         )}
-        <label>
-          Nombre cliente:
+        <label style={{ position: "relative" }}>
+          Cliente:
           <input
             type="text"
-            value={cliente.nombre}
-            onChange={(e) =>
-              setCliente({ ...cliente, nombre: e.target.value })
-            }
+            value={busquedaCliente}
+            onChange={handleBuscarCliente}
+            placeholder="Buscar cliente por nombre o cédula"
+            onFocus={() => setShowClienteDropdown(true)}
+            style={{ marginRight: 8 }}
           />
+          <button
+            type="button"
+            className="btn-registrar"
+            style={{ marginLeft: 8 }}
+            onClick={() =>
+              setCliente({ nombre: "ClienteDefault001", cedula: "000000000", telefono: "" })
+            }
+          >
+            Cliente default
+          </button>
+          {showClienteDropdown && busquedaCliente && (
+            <div className="dropdown-clientes">
+              {clientesList
+                .filter(c =>
+                  c.nombre.toLowerCase().includes(busquedaCliente.toLowerCase()) ||
+                  c.cedula.toLowerCase().includes(busquedaCliente.toLowerCase())
+                )
+                .slice(0, 8)
+                .map(c => (
+                  <div key={c.cedula} className="dropdown-item" onClick={() => handleSelectCliente(c)}>
+                    {c.nombre} ({c.cedula})
+                  </div>
+                ))}
+            </div>
+          )}
         </label>
-
+        <label>
+          Nombre:
+          <input type="text" value={cliente.nombre} disabled />
+        </label>
         <label>
           Cédula:
-          <input
-            type="text"
-            value={cliente.cedula}
-            onChange={(e) =>
-              setCliente({ ...cliente, cedula: e.target.value })
-            }
-          />
+          <input type="text" value={cliente.cedula} disabled />
+        </label>
+        <label>
+          Teléfono:
+          <input type="text" value={cliente.telefono || ""} disabled />
         </label>
 
         <table className="tabla-carrito">
@@ -284,7 +414,12 @@ export default function Ventas() {
                 </td>
                 <td>
                   {!ventaFinalizada && (
-                    <button onClick={() => handleEliminar(index)} className="tabla-carrito">Eliminar</button>
+                    <button
+                      onClick={() => handleEliminar(index)}
+                      className="tabla-carrito"
+                    >
+                      Eliminar
+                    </button>
                   )}
                 </td>
               </tr>
@@ -313,6 +448,12 @@ export default function Ventas() {
         ) : (
           <button className="btn-registrar" onClick={handleNuevaVenta}>
             Registrar nueva venta
+          </button>
+        )}
+
+        {ventaFinalizada && (
+          <button className="pdf-btn" onClick={generarFacturaPDF}>
+            Imprimir factura
           </button>
         )}
 
