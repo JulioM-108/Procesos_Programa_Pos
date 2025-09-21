@@ -235,10 +235,10 @@ export default function Ventas() {
         <h2> Ventas </h2>
 
         {usuario && (
-          <p>
-            <strong>Empleado:</strong> {usuario.nombre}<br />
-            <strong>Rol:</strong>  {usuario.rol}
-          </p>
+        <ul className="empleado-info">
+            <li><strong>Nombre:</strong> {usuario.nombre}</li>
+            <li><strong>Rol:</strong> {usuario.rol === "administrador" ? "Administrador" : "Cajero"}</li>
+          </ul>
         )}
         <label>
           Nombre cliente:
@@ -285,7 +285,7 @@ export default function Ventas() {
                 </td>
                 <td>
                   {!ventaFinalizada && (
-                    <button onClick={() => handleEliminar(index)}>❌</button>
+                    <button onClick={() => handleEliminar(index)} className="tabla-carrito">Eliminar</button>
                   )}
                 </td>
               </tr>

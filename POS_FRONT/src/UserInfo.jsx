@@ -68,35 +68,38 @@ export default function UserInfo() {
   if (loading) return <p>Cargando...</p>;
   if (!usuario) return <p>No se pudo obtener el usuario actual</p>;
 
-  return (
-    <div className="user-info-wrapper">
-      <div className="user-info-card">
-        <h2>Información del Usuario</h2>
-        <p><strong>Nombre:</strong> {usuario.nombre}</p>
-        <p><strong>Email:</strong> {usuario.email}</p>
-        <p><strong>Rol:</strong> {usuario.rol === "administrador" ? "Administrador" : "Cajero"}</p>
-
-        <h3>Autenticación Multifactor (MFA)</h3>
+return (
+  <div className="user-info-wrapper">
+    <div className="user-info-card">
+      <h2>Información del Usuario</h2>
+      <ul>
+        <li><strong>Nombre:</strong> {usuario.nombre}</li>
+        <li><strong>Email:</strong> {usuario.email}</li>
+        <li><strong>Rol:</strong> {usuario.rol === "administrador" ? "Administrador" : "Cajero"}</li>
+      </ul>
+    </div>
+    <div className="mfa-card">
+      <h2>Autenticación Multifactor (MFA)</h2>
+      {!factors.length > 0 && !qrCode && (
         <button className="mfa-btn" onClick={handleEnrollMFA}>Activar MFA</button>
-
-        {qrCode && (
-          <div className="mfa-qr">
-            <p>Escanear con Google Authenticator:</p>
-            <img src={qrCode} alt="Código QR para MFA" />
-            <div className="mfa-input">
-              <input
-                type="text"
-                placeholder="Código MFA (6 dígitos)"
-                value={mfaCode}
-                onChange={(e) => setMfaCode(e.target.value)}
-              />
-              <button onClick={handleVerifyMFA}>Verificar MFA</button>
-            </div>
+      )}
+      {qrCode && (
+        <div className="mfa-qr">
+          <img src={qrCode} alt="Código QR para MFA" />
+          <div className="mfa-input">
+            <input
+              type="text"
+              placeholder="Código MFA (6 dígitos)"
+              value={mfaCode}
+              onChange={(e) => setMfaCode(e.target.value)}
+            />
+            <button onClick={handleVerifyMFA}>Verificar MFA</button>
           </div>
-        )}
-
-        <h4>Factores MFA Activos</h4>
-        {factors.length > 0 ? (
+        </div>
+      )}
+      {factors.length > 0 && !qrCode && (
+        <>
+          <h4>Factores MFA Activos</h4>
           <ul>
             {factors.map((factor) => (
               <li key={factor.id}>
@@ -105,12 +108,10 @@ export default function UserInfo() {
               </li>
             ))}
           </ul>
-        ) : (
-          <p>No hay factores MFA activos</p>
-        )}
-
-        {error && <p className="error">{error}</p>}
-      </div>
+          {error && <p className="error">{error}</p>}
+        </>
+      )}
     </div>
-  );
+  </div>
+);
 }
