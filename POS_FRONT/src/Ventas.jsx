@@ -151,39 +151,38 @@ export default function Ventas() {
   // Registrar venta
   // =========================
   const handleRegistrarVenta = async () => {
-    if (!cliente.cedula || carrito.length === 0 || !usuario?.id_empleado) {
-      setMensaje("Faltan datos para registrar la venta");
-      setTipoMensaje("error");
-      ocultarMensaje();
-      return;
-    }
-
-    const venta = {
-      venta: {
-        cedula_cliente: cliente.cedula,
-        id_empleado: usuario.id_empleado,
-        fecha_venta: new Date().toISOString(),
-      },
-      detalles: carrito.map((item) => ({
-        id_producto: item.codigo,
-        nombre_producto: item.nombre,
-        cantidad: item.cantidad,
-        precio_unitario: item.precio,
-      })),
-    };
-
-    const resp = await postVenta(venta);
-
-    if (resp && resp.message === "Venta creada correctamente") {
-      setMensaje(resp.message);
-      setTipoMensaje("exito");
-      setVentaFinalizada(true);
-    } else {
-      setMensaje(resp?.message || "Error al registrar venta");
-      setTipoMensaje("error");
-    }
+  if (!cliente.cedula || carrito.length === 0 || !usuario?.id_empleado) {
+    setMensaje("Faltan datos para registrar la venta");
+    setTipoMensaje("error");
     ocultarMensaje();
+    return;
+  }
+  const venta = {
+    venta: {
+      cedula_cliente: cliente.cedula.trim(), // ✅ usamos el valor actualizado
+      id_empleado: usuario.id_empleado,
+      fecha_venta: new Date().toISOString(),
+    },
+    detalles: carrito.map((item) => ({
+      id_producto: item.codigo,
+      nombre_producto: item.nombre,
+      cantidad: item.cantidad,
+      precio_unitario: item.precio,
+    })),
   };
+
+  const resp = await postVenta(venta);
+
+  if (resp && resp.message === "Venta creada correctamente") {
+    setMensaje(resp.message);
+    setTipoMensaje("exito");
+    setVentaFinalizada(true);
+  } else {
+    setMensaje(resp?.message || "Error al registrar venta");
+    setTipoMensaje("error");
+  }
+  ocultarMensaje();
+};
 
   // =========================
   // Registrar nueva venta
