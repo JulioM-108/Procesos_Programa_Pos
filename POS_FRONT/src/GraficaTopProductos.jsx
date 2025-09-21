@@ -10,6 +10,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   LabelList,
+  Cell,
 } from "recharts";
 import "./styles/Graficas.css";
 
@@ -57,6 +58,13 @@ export default function GraficaTopProductos() {
     cargar();
   }, []);
 
+  // 🎨 Paleta de colores para las barras
+  const colors = [
+    "#e74c3c", "#3498db", "#2ecc71", "#f39c12",
+    "#9b59b6", "#1abc9c", "#e67e22", "#34495e",
+    "#ff6b6b", "#4dabf7"
+  ];
+
   return (
     <div style={{ width: "100%", padding: 20 }}>
       <h2 style={{ textAlign: "center" }}>Top Productos Vendidos</h2>
@@ -101,42 +109,39 @@ export default function GraficaTopProductos() {
           <ResponsiveContainer>
             <BarChart
               data={data}
-              margin={{ top: 10
-                , right: 35, left: 35, bottom: 60 }}
+              margin={{ top: 10, right: 35, left: 35, bottom: 60 }}
             >
               {/* Fondo de cuadrícula más sutil */}
               <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-              
-              {/* Eje X con nombres rotados y color blanco */}
-              <XAxis 
-                dataKey="name" 
-                angle={-20} 
-                textAnchor="end" 
-                interval={0} 
-                stroke="#ffffff" // <-- color blanco
+
+              {/* Eje X con nombres rotados y color oscuro */}
+              <XAxis
+                dataKey="name"
+                angle={-20}
+                textAnchor="end"
+                interval={0}
+                stroke="#2c3e50"
               />
 
-              {/* Eje Y con números en blanco */}
-              <YAxis stroke="#ffffff" />
+              {/* Eje Y con números en gris oscuro */}
+              <YAxis stroke="#2c3e50" />
 
-              {/* Barras con etiquetas en blanco */}
-              <Bar dataKey="value" fill="url(#colorUv)" animationDuration={1500}>
-                <LabelList dataKey="value" position="top" fill="#ffffff" /> 
-              </Bar>
+              {/* Tooltip personalizado */}
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#fff",
+                  borderRadius: "10px",
+                  border: "1px solid #ccc",
+                  color: "#2c3e50"
+                }}
+              />
 
-              
-              {/* Tooltip */}
-              <Tooltip />
-              
-              {/* Barras con degradado y animación */}
-              <defs>
-                <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#e88f63ff" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#e4e4eaff" stopOpacity={0.2}/>
-                </linearGradient>
-              </defs>
-              <Bar dataKey="value" fill="url(#colorUv)" animationDuration={1500}>
-                <LabelList dataKey="value" position="top" />
+              {/* Barras con colores dinámicos */}
+              <Bar dataKey="value" animationDuration={1200}>
+                <LabelList dataKey="value" position="top" fill="#2c3e50" />
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                ))}
               </Bar>
             </BarChart>
           </ResponsiveContainer>

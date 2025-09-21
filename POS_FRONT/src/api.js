@@ -1,3 +1,5 @@
+// src/api.js
+
 const API_URL = "http://localhost:3000/api";
 
 function getAuthHeader() {
@@ -8,23 +10,17 @@ function getAuthHeader() {
   };
 }
 
-// Helper para manejar respuestas (mejor manejo de errores y preserva todo el JSON)
+// Helper para manejar respuestas
 async function handleResponse(response) {
-  // Intentar parsear JSON (defensivo)
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    // Imprime el objeto completo que venga del backend para depuración
     console.error("Error en la respuesta:", data || response.statusText);
-    // Devuelve todo el objeto de respuesta (no solo data.error) para que el front pueda
-    // inspeccionar propiedades como `factors`, `needsMfa`, etc.
     return data || { error: response.statusText || "Error desconocido" };
   }
 
   return data;
 }
-
-
 
 // ==========================
 // AUTENTICACIÓN Y MFA
@@ -291,6 +287,7 @@ export async function busquedaProductoNombre(querytxt) {
     return { error: error.message };
   }
 }
+
 // ==========================
 // CATEGORIAS
 // ==========================
@@ -405,16 +402,26 @@ export async function getClientesFrecuentes(desde, hasta, limite = 10) {
     if (desde) params.append("desde", desde);
     if (hasta) params.append("hasta", hasta);
     params.append("limite", String(limite));
-
-    const res = await fetch(`${API_URL}/reportes/clientes_frecuentes?${params.toString()}`, {
-      headers: getAuthHeader(),
-    });
+    const res = await fetch(`${API_URL}/reportes/clientes-frecuentes2?${params.toString()}`, { headers: getAuthHeader() });
     return await handleResponse(res);
   } catch (error) {
-    console.error("Error al obtener clientes frecuentes:", error);
+    console.error("Error getClientesFrecuentes:", error);
     return { error: error.message };
   }
 }
+
+export async function getProductosBajoStock(umbral = 5) {
+  try {
+    const res = await fetch(`${API_URL}/reportes/productos-bajo-stock2?umbral=${encodeURIComponent(String(umbral))}`, { headers: getAuthHeader() });
+    return await handleResponse(res);
+  } catch (error) {
+    console.error("Error getProductosBajoStock:", error);
+    return { error: error.message };
+  }
+}
+
+
+
 
 export async function getListadoVentas(meses = 3) {
   try {
@@ -427,4 +434,3 @@ export async function getListadoVentas(meses = 3) {
     return { error: error.message };
   }
 }
-
