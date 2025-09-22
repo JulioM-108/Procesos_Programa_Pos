@@ -396,30 +396,63 @@ export async function getTopProductos(desde, hasta, limite = 10) {
   }
 }
 
-export async function getClientesFrecuentes(desde, hasta, limite = 10) {
+// export async function getClientesFrecuentes(desde, hasta, limite = 10) {
+//   try {
+//     const params = new URLSearchParams();
+//     if (desde) params.append("desde", desde);
+//     if (hasta) params.append("hasta", hasta);
+//     params.append("limite", String(limite));
+//     const res = await fetch(`${API_URL}/reportes/clientes-frecuentes2?${params.toString()}`, { headers: getAuthHeader() });
+//     return await handleResponse(res);
+//   } catch (error) {
+//     console.error("Error getClientesFrecuentes:", error);
+//     return { error: error.message };
+//   }
+// }
+// ==========================
+// REPORTES
+// ==========================
+
+// Clientes más frecuentes (directo)
+export async function getClientesFrecuentesDirecto(desde, hasta, limite = 10) {
   try {
     const params = new URLSearchParams();
     if (desde) params.append("desde", desde);
     if (hasta) params.append("hasta", hasta);
     params.append("limite", String(limite));
-    const res = await fetch(`${API_URL}/reportes/clientes-frecuentes2?${params.toString()}`, { headers: getAuthHeader() });
+
+    const res = await fetch(`${API_URL}/reportes/clientes-frecuentes?${params.toString()}`, {
+      headers: getAuthHeader(),
+    });
+
     return await handleResponse(res);
   } catch (error) {
-    console.error("Error getClientesFrecuentes:", error);
+    console.error("Error en getClientesFrecuentesDirecto:", error);
     return { error: error.message };
   }
 }
 
-export async function getProductosBajoStock(umbral = 5) {
+// export async function getProductosBajoStock(umbral = 5) {
+//   try {
+//     const res = await fetch(`${API_URL}/reportes/productos-bajo-stock2?umbral=${encodeURIComponent(String(umbral))}`, { headers: getAuthHeader() });
+//     return await handleResponse(res);
+//   } catch (error) {
+//     console.error("Error getProductosBajoStock:", error);
+//     return { error: error.message };
+//   }
+// }
+// 📦 Productos con bajo stock (directo)
+export async function getProductosBajoStock(limite = 10) {
   try {
-    const res = await fetch(`${API_URL}/reportes/productos-bajo-stock2?umbral=${encodeURIComponent(String(umbral))}`, { headers: getAuthHeader() });
+    const res = await fetch(`${API_URL}/reportes/productos_bajo_stock?limite=${limite}`, {
+      headers: getAuthHeader(),
+    });
     return await handleResponse(res);
-  } catch (error) {
-    console.error("Error getProductosBajoStock:", error);
-    return { error: error.message };
+  } catch (err) {
+    console.error("Error en getProductosBajoStock:", err);
+    return { error: err.message };
   }
 }
-
 
 
 

@@ -1,8 +1,8 @@
 // src/components/Reportes.jsx
 import React, { useState } from "react";
 import GraficaTopProductos from "./GraficaTopProductos";
-// import GraficaClientesFrecuentes from "./GraficaClientesFrecuentes";
-// import GraficaProductosBajoStock from "./GraficaProductosStock";
+import GraficaClientesFrecuentes from "./GraficaClientesFrecuentes";
+import GraficaProductosBajoStock from "./GraficaProductosStock";
 import "./styles/Reportes.css";
 
 export default function Reportes() {
@@ -12,10 +12,10 @@ export default function Reportes() {
     switch (tipoReporte) {
       case "top_productos":
         return <GraficaTopProductos />;
-      // case "clientes_frecuentes":
-      //   return <GraficaClientesFrecuentes />;
-      // case "bajo_stock":
-      //   return <GraficaProductosBajoStock />;
+      case "clientes_frecuentes":
+        return <GraficaClientesFrecuentes />;
+      case "bajo_stock":
+        return <GraficaProductosBajoStock />;
       default:
         return <p style={{ textAlign: "center", color: "#2c3e50" }}>Selecciona un reporte</p>;
     }
@@ -35,8 +35,8 @@ export default function Reportes() {
         onChange={(e) => setTipoReporte(e.target.value)}
       >
         <option value="top_productos">Top Productos Vendidos</option>
-        {/* <option value="clientes_frecuentes">Clientes Más Frecuentes</option>
-        <option value="bajo_stock">Productos con Bajo Stock</option> */}
+        <option value="clientes_frecuentes">Clientes Más Frecuentes</option>
+        <option value="bajo_stock">Productos con Bajo Stock</option>
       </select>
 
       {/* Contenedor de la gráfica */}

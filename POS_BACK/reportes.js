@@ -84,46 +84,117 @@ router.get("/listado_ventas", async (req, res) => {
   }
 });
 
-// 👥 Clientes más frecuentes
-// GET /api/reportes/clientes-frecuentes2?desde=2025-09-01&hasta=2025-09-10&limite=10
-router.get("/clientes-frecuentes2", async (req, res) => {
-  const { desde, hasta, limite } = req.query;
+// // 👥 Clientes más frecuentes
+// // GET /api/reportes/clientes-frecuentes2?desde=2025-09-01&hasta=2025-09-10&limite=10
+// router.get("/clientes-frecuentes2", async (req, res) => {
+//   const { desde, hasta, limite } = req.query;
+//   try {
+//     const { data, error } = await createClient(supabaseUrl, supabaseAnonKey).rpc("rpt_clientes_frecuentes2", {
+//       p_desde: desde || null,
+//       p_hasta: hasta || null,
+//       p_limite: limite ? parseInt(limite) : 10,
+//     });
+
+//     if (error) {
+//       console.error("Error rpt_clientes_frecuentes2:", error);
+//       return res.status(400).json({ error: error.message });
+//     }
+
+//     return res.json({ resultados: data });
+//   } catch (e) {
+//     console.error("Excepción en /reportes/clientes-frecuentes2:", e);
+//     return res.status(500).json({ error: "Error inesperado" });
+//   }
+// });
+// 👥 Clientes más frecuentes (directo, sin RPC)
+router.get("/clientes-frecuentes", async (req, res) => {
   try {
-    const { data, error } = await createClient(supabaseUrl, supabaseAnonKey).rpc("rpt_clientes_frecuentes2", {
-      p_desde: desde || null,
-      p_hasta: hasta || null,
-      p_limite: limite ? parseInt(limite) : 10,
-    });
+    const limite = req.query.limite ? parseInt(req.query.limite, 10) : 10;
+    const desde = req.query.desde ? req.query.desde : null;
+    const hasta = req.query.hasta ? req.query.hasta : null;
+
+    const supabase = getSupabaseClient(req);
+
+    // Construimos la query usando supabase.from().select()
+    let query = supabase
+      .from("ventas")
+      .select(`
+        clientes!inner(cedula, nombre),
+        id_venta
+      `);
+
+    if (desde) query = query.gte("fecha_venta", desde);
+    if (hasta) query = query.lte("fecha_venta", hasta);
+
+    const { data, error } = await query;
 
     if (error) {
-      console.error("Error rpt_clientes_frecuentes2:", error);
-      return res.status(400).json({ error: error.message });
+      console.error("Error en clientes-frecuentes:", error);
+      return res.status(500).json({ error: error.message });
     }
 
-    return res.json({ resultados: data });
+    // Agrupamos y contamos manualmente
+    const counts = {};
+    data.forEach((venta) => {
+      const { cedula, nombre } = venta.clientes;
+      const key = cedula;
+      if (!counts[key]) counts[key] = { cedula, nombre, total_compras: 0 };
+      counts[key].total_compras += 1;
+    });
+
+    // Convertimos a array y ordenamos
+    const resultados = Object.values(counts)
+      .sort((a, b) => b.total_compras - a.total_compras)
+      .slice(0, limite);
+
+    return res.json({ total: resultados.length, resultados });
   } catch (e) {
-    console.error("Excepción en /reportes/clientes-frecuentes2:", e);
+    console.error("Excepción en /clientes-frecuentes:", e);
     return res.status(500).json({ error: "Error inesperado" });
   }
 });
 
-// 📦 Productos con bajo stock
-// GET /api/reportes/productos-bajo-stock2?umbral=5
-router.get("/productos-bajo-stock2", async (req, res) => {
-  const { umbral } = req.query;
+// // 📦 Productos con bajo stock
+// // GET /api/reportes/productos-bajo-stock2?umbral=5
+// router.get("/productos-bajo-stock2", async (req, res) => {
+//   const { umbral } = req.query;
+//   try {
+//     const { data, error } = await createClient(supabaseUrl, supabaseAnonKey).rpc("rpt_productos_bajo_stock2", {
+//       p_umbral: umbral ? parseInt(umbral) : 5,
+//     });
+
+//     if (error) {
+//       console.error("Error rpt_productos_bajo_stock2:", error);
+//       return res.status(400).json({ error: error.message });
+//     }
+
+//     return res.json({ resultados: data });
+//   } catch (e) {
+//     console.error("Excepción en /reportes/productos-bajo-stock2:", e);
+//     return res.status(500).json({ error: "Error inesperado" });
+//   }
+// });
+
+// Productos con bajo stock (directo, sin RPC)
+router.get("/productos_bajo_stock", async (req, res) => {
   try {
-    const { data, error } = await createClient(supabaseUrl, supabaseAnonKey).rpc("rpt_productos_bajo_stock2", {
-      p_umbral: umbral ? parseInt(umbral) : 5,
-    });
+    const limite = req.query.limite ? parseInt(req.query.limite, 10) : 10;
+
+    const supabase = getSupabaseClient(req);
+    const { data, error } = await supabase
+      .from("productos")
+      .select("id_producto, nombre, cantidad")
+      .order("cantidad", { ascending: true })
+      .limit(limite); // 👈 aquí
 
     if (error) {
-      console.error("Error rpt_productos_bajo_stock2:", error);
-      return res.status(400).json({ error: error.message });
+      console.error("Error en productos_bajo_stock:", error);
+      return res.status(500).json({ error: error.message });
     }
 
-    return res.json({ resultados: data });
+    return res.json({ total: data.length, resultados: data });
   } catch (e) {
-    console.error("Excepción en /reportes/productos-bajo-stock2:", e);
+    console.error("Excepción en productos_bajo_stock:", e);
     return res.status(500).json({ error: "Error inesperado" });
   }
 });
