@@ -4,6 +4,7 @@ import {
   postVenta,
   getUsuarioActual,
   getClientes,
+  putCliente,
 } from "./api";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -27,6 +28,7 @@ export default function Ventas() {
   const [busquedaCliente, setBusquedaCliente] = useState("");
   const [showClienteDropdown, setShowClienteDropdown] = useState(false);
   const [idVentaGenerada, setIdVentaGenerada] = useState(""); // Guardar el id_venta al registrar la venta
+  const [ultimaVentaResumen, setUltimaVentaResumen] = useState(null);
 
   const porPagina = 6;
 
@@ -164,20 +166,61 @@ export default function Ventas() {
   };
 
   // =========================
+  // Calcular puntos y descuento
+  // =========================
+  const calcularPuntosOtorgados = (total) => Math.floor(total / 150);
+  const calcularDescuentoPorPuntos = (total, puntos) => {
+    const maxDescuento = 0.35;
+    const descuentoPorPunto = 0.05;
+    const descuento = Math.min(puntos * descuentoPorPunto, maxDescuento);
+    return +(total * descuento).toFixed(2);
+  };
+
+  // =========================
   // Registrar venta
   // =========================
   const handleRegistrarVenta = async () => {
+
     if (!cliente.cedula || carrito.length === 0 || !usuario?.id_empleado) {
       setMensaje("Faltan datos para registrar la venta");
       setTipoMensaje("error");
-      ocultarMensaje();
+      // Mostrar el mensaje por 3 segundos
+      setTimeout(() => {
+        setMensaje(null);
+        setTipoMensaje(null);
+      }, 3000);
       return;
     }
+
+    // Buscar los puntos actuales del cliente seleccionado (no default)
+    let puntosCliente = 0;
+    let puntosUsar = 0;
+    if (cliente.cedula !== "000000000") {
+      const clienteActual = clientesList.find(c => c.cedula === cliente.cedula);
+      puntosCliente = clienteActual?.puntos || 0;
+      puntosUsar = Math.min(puntosCliente, 7); // Máximo 7 puntos por compra
+    }
+
+    const totalVenta = carrito.reduce(
+      (acc, item) => acc + item.precio * item.cantidad,
+      0
+    );
+    // El descuento se calcula con los puntos a usar
+    const descuento = calcularDescuentoPorPuntos(totalVenta, puntosUsar);
+    // El total con descuento es la base para otorgar nuevos puntos
+    const totalConDescuento = Math.max(0, +(totalVenta - descuento).toFixed(2));
+    // Los puntos otorgados se calculan sobre el total con descuento
+    const puntosOtorgados = calcularPuntosOtorgados(totalConDescuento);
+
     const venta = {
       venta: {
-        cedula_cliente: cliente.cedula.trim(), // ✅ usamos el valor actualizado
+        cedula_cliente: cliente.cedula.trim(),
         id_empleado: usuario.id_empleado,
         fecha_venta: new Date().toISOString(),
+        subtotal: totalVenta,
+        descuento: descuento,
+        total: totalConDescuento,
+        puntos_otorgados: puntosOtorgados,
       },
       detalles: carrito.map((item) => ({
         id_producto: item.codigo,
@@ -189,14 +232,33 @@ export default function Ventas() {
 
     const resp = await postVenta(venta);
 
+    // Si la venta fue exitosa y el cliente no es el default, actualizar sus puntos
     if (resp && resp.message === "Venta creada correctamente") {
-      setMensaje(resp.message);
+      if (cliente.cedula !== "000000000") {
+  // Descontar los puntos usados y sumar los otorgados en una sola actualización
+  const puntosFinales = (puntosCliente - puntosUsar) + puntosOtorgados;
+  await putCliente(cliente.cedula, { puntos: puntosFinales });
+  setCliente(prev => ({ ...prev, puntos: puntosFinales }));
+      }
+      setMensaje("¡Venta registrada exitosamente!");
       setTipoMensaje("exito");
       setVentaFinalizada(true);
-      setIdVentaGenerada(resp.id_venta || ""); // Guardar el id_venta generado
+      setIdVentaGenerada(resp.id_venta || "");
+      setUltimaVentaResumen({
+        subtotal: totalVenta,
+        descuento,
+        total: totalConDescuento,
+        puntosOtorgados,
+        puntosCliente,
+      });
     } else {
       setMensaje(resp?.message || "Error al registrar venta");
       setTipoMensaje("error");
+      // Mostrar el mensaje por 3 segundos
+      setTimeout(() => {
+        setMensaje(null);
+        setTipoMensaje(null);
+      }, 3000);
     }
     ocultarMensaje();
   };
@@ -267,6 +329,13 @@ export default function Ventas() {
     doc.text(`Nombre: ${cliente.nombre}`, 20, 58);
     doc.text(`Cédula: ${cliente.cedula}`, 20, 64);
     doc.text(`Teléfono: ${cliente.telefono || "-"}`, 20, 70);
+    doc.text(
+      `Puntos actuales: ${
+        ultimaVentaResumen?.puntosCliente ?? cliente.puntos ?? 0
+      }`,
+      20,
+      76
+    );
 
     // Cajero
     doc.setFont(undefined, "bold");
@@ -277,7 +346,7 @@ export default function Ventas() {
 
     // Tabla de productos
     autoTable(doc, {
-      startY: 80,
+      startY: 85,
       head: [["Producto", "Cantidad", "Precio Unitario", "Subtotal"]],
       body: carrito.map((item) => [
         item.nombre,
@@ -291,14 +360,29 @@ export default function Ventas() {
     });
 
     // Totales
-    const subtotal = carrito.reduce(
-      (acc, item) => acc + item.precio * item.cantidad,
-      0
-    );
     doc.setFont(undefined, "bold");
-    doc.text(`Subtotal: $${subtotal.toFixed(2)}`, 20, doc.lastAutoTable.finalY + 10);
-    doc.text(`Descuento: $0.00`, 20, doc.lastAutoTable.finalY + 18);
-    doc.text(`Total: $${subtotal.toFixed(2)}`, 20, doc.lastAutoTable.finalY + 26);
+    doc.text(
+      `Subtotal: $${ultimaVentaResumen?.subtotal?.toFixed(2) ?? "-"}`,
+      20,
+      doc.lastAutoTable.finalY + 10
+    );
+    doc.text(
+      `Descuento: $${ultimaVentaResumen?.descuento?.toFixed(2) ?? "-"}`,
+      20,
+      doc.lastAutoTable.finalY + 18
+    );
+    doc.text(
+      `Total: $${ultimaVentaResumen?.total?.toFixed(2) ?? "-"}`,
+      20,
+      doc.lastAutoTable.finalY + 26
+    );
+    doc.text(
+      `Puntos otorgados en esta venta: ${
+        ultimaVentaResumen?.puntosOtorgados ?? 0
+      }`,
+      20,
+      doc.lastAutoTable.finalY + 34
+    );
     doc.setFont(undefined, "normal");
 
     // Pie de página
@@ -427,7 +511,44 @@ export default function Ventas() {
           </tbody>
         </table>
 
-        <h3>Total: ${calcularTotal()}</h3>
+
+        {/* Mostrar descuento y total con descuento antes de registrar la venta */}
+        <h3>Subtotal: ${calcularTotal()}</h3>
+        <h3>
+          Puntos disponibles: {(() => {
+            if (cliente.cedula === "000000000") return 0;
+            const clienteActual = clientesList.find(c => c.cedula === cliente.cedula);
+            return clienteActual?.puntos || 0;
+          })()}
+        </h3>
+        <h3>
+          Puntos a usar (máx 7): {(() => {
+            if (cliente.cedula === "000000000") return 0;
+            const clienteActual = clientesList.find(c => c.cedula === cliente.cedula);
+            return Math.min(clienteActual?.puntos || 0, 7);
+          })()}
+        </h3>
+        <h3>
+          Descuento por puntos: $
+          {(() => {
+            const subtotal = Number(calcularTotal());
+            if (cliente.cedula === "000000000") return "0.00";
+            const clienteActual = clientesList.find(c => c.cedula === cliente.cedula);
+            const puntosUsar = Math.min(clienteActual?.puntos || 0, 7);
+            return calcularDescuentoPorPuntos(subtotal, puntosUsar).toFixed(2);
+          })()}
+        </h3>
+        <h3>
+          Total con descuento: $
+          {(() => {
+            const subtotal = Number(calcularTotal());
+            if (cliente.cedula === "000000000") return subtotal.toFixed(2);
+            const clienteActual = clientesList.find(c => c.cedula === cliente.cedula);
+            const puntosUsar = Math.min(clienteActual?.puntos || 0, 7);
+            const descuento = calcularDescuentoPorPuntos(subtotal, puntosUsar);
+            return (subtotal - descuento).toFixed(2);
+          })()}
+        </h3>
 
         <label>
           Método de pago:

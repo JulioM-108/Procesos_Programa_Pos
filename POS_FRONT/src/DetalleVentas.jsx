@@ -1,8 +1,66 @@
 import React, { useEffect, useState } from "react";
+// Loader global reutilizable
+function Loader() {
+  return (
+    <div style={{
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      zIndex: 1000,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '300px',
+      width: '100%'
+    }}>
+      <div style={{
+        border: '6px solid #e9ecef',
+        borderTop: '6px solid #27ae60',
+        borderRadius: '50%',
+        width: 48,
+        height: 48,
+        animation: 'spin 1s linear infinite',
+        marginBottom: 16
+      }} />
+      <span style={{ color: '#27ae60', fontWeight: 600, fontSize: '1.1rem' }}>Cargando...</span>
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  );
+}
 import { getVentas, getDetalleVenta, getEmpleados, getClientes } from "./api";
 import "./styles/DetalleVentas.css";
 
 export default function DetalleVentas() {
+  // Estado para mostrar/ocultar la tabla de ventas del día
+  const [mostrarVentasDia, setMostrarVentasDia] = useState(false);
+  const [ventasHoy, setVentasHoy] = useState([]);
+  const [gananciaHoy, setGananciaHoy] = useState(0);
+
+  // Calcular ventas y ganancia del día actual
+  useEffect(() => {
+    if (!mostrarVentasDia) return;
+    const hoy = new Date();
+    const inicioDia = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+    const finDia = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59);
+    getVentas().then((ventasData) => {
+      if (!Array.isArray(ventasData)) return;
+      const ventasDelDia = ventasData.filter(v => {
+        const fecha = new Date(v.fecha_venta);
+        return fecha >= inicioDia && fecha <= finDia;
+      });
+      setVentasHoy(ventasDelDia);
+      // Sumar la columna total de todas las ventas del día
+      const ganancia = ventasDelDia.reduce((acc, v) => acc + (v.total || 0), 0);
+      setGananciaHoy(ganancia);
+    });
+  }, [mostrarVentasDia]);
   const [detallesCompletos, setDetallesCompletos] = useState([]);
   const [empleados, setEmpleados] = useState([]);
   const [clientes, setClientes] = useState([]);
@@ -99,11 +157,54 @@ export default function DetalleVentas() {
   const detallesActuales = detallesFiltrados.slice(indexPrimero, indexUltimo);
   const totalPaginas = Math.ceil(detallesFiltrados.length / itemsPorPagina);
 
-  if (loading) return <div>Cargando...</div>;
+  if (loading) return <Loader />;
   if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="detalle-ventas-container">
+      {/* Botón para mostrar/ocultar ventas del día */}
+      <button
+        style={{ marginBottom: 16, marginTop: 24, padding: '8px 16px', fontWeight: 600, borderRadius: 6, background: '#27ae60', color: 'white', border: 'none', cursor: 'pointer', display: 'block' }}
+        onClick={() => setMostrarVentasDia((prev) => !prev)}
+      >
+        {mostrarVentasDia ? 'Ocultar ventas del día' : 'Mostrar ventas del día'}
+      </button>
+
+      {/* Tabla de ventas del día y ganancia */}
+      {mostrarVentasDia && (
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ color: '#27ae60', marginBottom: 8 }}>Ventas del día ({ventasHoy.length})</h2>
+          <table className="detalle-table">
+            <thead>
+              <tr>
+                <th>ID Venta</th>
+                <th>Empleado</th>
+                <th>Cliente</th>
+                <th>Subtotal</th>
+                <th>Descuento</th>
+                <th>Total</th>
+                <th>Fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ventasHoy.map(v => (
+                <tr key={v.id_venta}>
+                  <td>{v.id_venta}</td>
+                  <td>{empleados.find(e => e.id_empleado === v.id_empleado)?.nombre || 'N/A'}</td>
+                  <td>{clientes.find(c => c.cedula === v.cedula_cliente)?.nombre || 'N/A'}</td>
+                  <td>${v.subtotal?.toFixed(2) ?? '0.00'}</td>
+                  <td>${v.descuento?.toFixed(2) ?? '0.00'}</td>
+                  <td>${v.total?.toFixed(2) ?? '0.00'}</td>
+                  <td>{new Date(v.fecha_venta).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <h3 style={{ color: '#2c3e50', marginTop: 12 }}>
+            Ganancia total del día: <span style={{ color: '#27ae60' }}>${gananciaHoy.toFixed(2)}</span>
+          </h3>
+        </div>
+      )}
       <h1 className="detalle-title">Detalle de Ventas</h1>
 
       {/* Filtros */}

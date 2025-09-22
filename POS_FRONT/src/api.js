@@ -247,7 +247,7 @@ export async function createProducto(producto) {
 
 export async function updateProducto(producto) {
   try {
-    const res = await fetch(`${API_URL}/producto`, {
+    const res = await fetch(`${API_URL}/productos`, {
       method: "PUT",
       headers: getAuthHeader(),
       body: JSON.stringify(producto),
@@ -261,7 +261,7 @@ export async function updateProducto(producto) {
 
 export async function toggleEstadoProducto(id_producto, estadoActual) {
   try {
-    const res = await fetch(`${API_URL}/producto`, {
+    const res = await fetch(`${API_URL}/productos`, {
       method: "PUT",
       headers: getAuthHeader(),
       body: JSON.stringify({ id_producto, estado: !estadoActual }),
